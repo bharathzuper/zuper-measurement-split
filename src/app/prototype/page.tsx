@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { DarkNav } from '@/components/app-shell/dark-nav';
 import { TopBar } from '@/components/app-shell/top-bar';
@@ -15,17 +15,28 @@ import type { JobDetailTab } from '@/lib/types';
 export default function PrototypePage() {
 	const [activeTab, setActiveTab] = useState<JobDetailTab>('measurements');
 	const onboarding = useFeatureOnboarding();
+	const [guidedStep, setGuidedStep] = useState(0);
+
+	const handleOnboardingDismiss = useCallback(() => {
+		onboarding.dismiss();
+		setTimeout(() => setGuidedStep(1), 600);
+	}, [onboarding]);
+
+	const handleReplay = useCallback(() => {
+		setGuidedStep(0);
+		onboarding.reset();
+	}, [onboarding]);
 
 	return (
 		<div className="flex h-screen overflow-hidden">
 			<AnimatePresence>
-				{onboarding.show && <FeatureOnboarding onDismiss={onboarding.dismiss} />}
+				{onboarding.show && <FeatureOnboarding onDismiss={handleOnboardingDismiss} />}
 			</AnimatePresence>
 
-			{/* Replay onboarding FAB — demo convenience */}
+			{/* Replay onboarding FAB */}
 			{!onboarding.show && (
 				<button
-					onClick={onboarding.reset}
+					onClick={handleReplay}
 					title="Replay onboarding"
 					className="fixed bottom-4 right-4 z-[999] size-9 rounded-full bg-[#0f172a] border border-white/10 shadow-lg shadow-black/20 flex items-center justify-center hover:bg-[#1e293b] transition-colors cursor-pointer group"
 				>
@@ -54,9 +65,9 @@ export default function PrototypePage() {
 								<div className="w-full flex items-stretch h-full min-h-0">
 									<JobSidebar job={mockJob} activeTab={activeTab} onTabChange={setActiveTab} />
 									<div className="details-center-panel-container overflow-hidden bg-detail-page h-full min-h-0 flex flex-col">
-										{activeTab === 'measurements' ? (
-											<MeasurementTab />
-										) : (
+									{activeTab === 'measurements' ? (
+										<MeasurementTab guidedStep={guidedStep} onGuidedStepChange={setGuidedStep} />
+									) : (
 											<PlaceholderTab />
 										)}
 									</div>

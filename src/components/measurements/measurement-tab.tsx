@@ -81,7 +81,40 @@ function UndoSplitDialog({ splitCount, onConfirm, onCancel }: { splitCount: numb
 	);
 }
 
-function SplitMeasurementMenuItem({ canSplit, onSplit }: { canSplit: boolean; onSplit: () => void }) {
+function KebabSpotlight() {
+	return (
+		<>
+			{/* Pulsing ring */}
+			<motion.div
+				className="absolute inset-[-6px] rounded-lg border-2 border-[#f59e0b] pointer-events-none"
+				animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.08, 1] }}
+				transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+			/>
+			{/* Tooltip nudge below */}
+			<motion.div
+				className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 z-50 pointer-events-none whitespace-nowrap"
+				initial={{ opacity: 0, y: -4 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.3, duration: 0.3 }}
+			>
+				<div className="relative bg-white rounded-lg px-3 py-2 shadow-lg shadow-black/[0.06] border border-[#e2e8f0]">
+					{/* Arrow */}
+					<div className="absolute -top-[5px] left-1/2 -translate-x-1/2">
+						<div className="w-2.5 h-2.5 bg-white border-l border-t border-[#e2e8f0] rotate-45 rounded-[1px]" />
+					</div>
+					<div className="flex items-center gap-1.5">
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+							<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
+						</svg>
+						<span className="text-[12px] font-semibold text-[#0f172a]">Click here to split</span>
+					</div>
+				</div>
+			</motion.div>
+		</>
+	);
+}
+
+function SplitMeasurementMenuItem({ canSplit, onSplit, highlight }: { canSplit: boolean; onSplit: () => void; highlight?: boolean }) {
 	const [showTooltip, setShowTooltip] = useState(false);
 	const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
 	const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -104,9 +137,16 @@ function SplitMeasurementMenuItem({ canSplit, onSplit }: { canSplit: boolean; on
 
 	return (
 		<>
-			<div ref={itemRef} onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+			<div ref={itemRef} onMouseEnter={handleEnter} onMouseLeave={handleLeave} className="relative">
+				{highlight && (
+					<motion.div
+						className="absolute inset-0 rounded-md border-2 border-[#f59e0b] pointer-events-none z-10"
+						animate={{ opacity: [0.4, 1, 0.4] }}
+						transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+					/>
+				)}
 				<DropdownMenuItem
-					className="text-base min-h-10 px-3 py-2 rounded-md flex items-center w-full cursor-pointer"
+					className={`text-base min-h-10 px-3 py-2 rounded-md flex items-center w-full cursor-pointer ${highlight ? 'bg-[#fffbeb]' : ''}`}
 					disabled={!canSplit}
 					onClick={() => { if (canSplit) onSplit(); }}
 				>
@@ -170,12 +210,13 @@ function SplitMeasurementMenuItem({ canSplit, onSplit }: { canSplit: boolean; on
 	);
 }
 
-export function MeasurementTab() {
+export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?: number; onGuidedStepChange?: (step: number) => void } = {}) {
 	const [splitChildCards, setSplitChildCards] = useState<MeasurementCard[] | null>(null);
 	const [splitDrawerOpen, setSplitDrawerOpen] = useState(false);
 	const [toast, setToast] = useState<string | null>(null);
 	const [undoDialogOpen, setUndoDialogOpen] = useState(false);
 	const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+	const kebabRef = useRef<HTMLButtonElement>(null);
 
 	const isSplit = !!splitChildCards && splitChildCards.length > 0;
 
@@ -524,12 +565,16 @@ export function MeasurementTab() {
 							) : null}
 
 							<div className="relative">
-								<DropdownMenu>
+								<DropdownMenu onOpenChange={(open) => {
+									if (open && guidedStep === 1) onGuidedStepChange?.(2);
+								}}>
 									<DropdownMenuTrigger
+										ref={kebabRef}
 										type="button"
-										className="border p-2 rounded-md flex items-center h-10 justify-center hover:bg-gray-50 bg-white cursor-pointer"
+										className="border p-2 rounded-md flex items-center h-10 justify-center hover:bg-gray-50 bg-white cursor-pointer relative"
 									>
 										<i className="ti ti-dots-vertical text-lg" />
+										{guidedStep === 1 && <KebabSpotlight />}
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end" className="w-56 p-1">
 										<DropdownMenuGroup>
@@ -541,7 +586,8 @@ export function MeasurementTab() {
 											{!isSelectedChildSplit && !isSelectedSplitParent && (
 												<SplitMeasurementMenuItem
 													canSplit={canSplit}
-													onSplit={() => setSplitDrawerOpen(true)}
+													onSplit={() => { onGuidedStepChange?.(0); setSplitDrawerOpen(true); }}
+													highlight={guidedStep === 2}
 												/>
 											)}
 											{isSelectedSplitParent && (
