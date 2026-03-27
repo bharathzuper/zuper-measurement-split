@@ -83,11 +83,19 @@ function UndoSplitDialog({ splitCount, onConfirm, onCancel }: { splitCount: numb
 
 function SplitMeasurementMenuItem({ canSplit, onSplit }: { canSplit: boolean; onSplit: () => void }) {
 	const [showTooltip, setShowTooltip] = useState(false);
+	const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
 	const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+	const itemRef = useRef<HTMLDivElement>(null);
 
 	const handleEnter = () => {
 		clearTimeout(timeoutRef.current);
-		timeoutRef.current = setTimeout(() => setShowTooltip(true), 400);
+		timeoutRef.current = setTimeout(() => {
+			if (itemRef.current) {
+				const rect = itemRef.current.getBoundingClientRect();
+				setTooltipPos({ top: rect.top + rect.height / 2, left: rect.right + 12 });
+			}
+			setShowTooltip(true);
+		}, 350);
 	};
 	const handleLeave = () => {
 		clearTimeout(timeoutRef.current);
@@ -95,67 +103,70 @@ function SplitMeasurementMenuItem({ canSplit, onSplit }: { canSplit: boolean; on
 	};
 
 	return (
-		<div className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
-			<DropdownMenuItem
-				className="text-base min-h-10 px-3 py-2 rounded-md flex items-center w-full cursor-pointer"
-				disabled={!canSplit}
-				onClick={() => { if (canSplit) onSplit(); }}
-			>
-				<span className="flex items-center gap-2 w-full">
-					<span className="font-medium text-gray-700">Split Measurement</span>
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="ml-auto shrink-0">
-						<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
-					</svg>
-				</span>
-			</DropdownMenuItem>
+		<>
+			<div ref={itemRef} onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+				<DropdownMenuItem
+					className="text-base min-h-10 px-3 py-2 rounded-md flex items-center w-full cursor-pointer"
+					disabled={!canSplit}
+					onClick={() => { if (canSplit) onSplit(); }}
+				>
+					<span className="flex items-center gap-2 w-full">
+						<span className="font-medium text-gray-700">Split Measurement</span>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="ml-auto shrink-0">
+							<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
+						</svg>
+					</span>
+				</DropdownMenuItem>
+			</div>
 
 			<AnimatePresence>
-				{showTooltip && (
+				{showTooltip && tooltipPos && (
 					<motion.div
-						initial={{ opacity: 0, x: 8, scale: 0.96 }}
+						initial={{ opacity: 0, x: -6, scale: 0.97 }}
 						animate={{ opacity: 1, x: 0, scale: 1 }}
-						exit={{ opacity: 0, x: 8, scale: 0.96 }}
+						exit={{ opacity: 0, x: -6, scale: 0.97 }}
 						transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
-						className="absolute right-full top-1/2 -translate-y-1/2 mr-3 z-50 w-[260px] pointer-events-none"
+						className="fixed z-[9999] w-[260px] pointer-events-none"
+						style={{ top: tooltipPos.top, left: tooltipPos.left, transform: 'translateY(-50%)' }}
 					>
-						<div className="bg-[#0f172a] rounded-xl p-4 shadow-2xl shadow-black/25 relative">
-							{/* Arrow pointing right */}
-							<div className="absolute top-1/2 -translate-y-1/2 -right-[6px]">
-								<div className="w-3 h-3 bg-[#0f172a] rotate-45 rounded-[1px]" />
+						<div className="bg-white rounded-xl p-4 shadow-xl shadow-black/[0.08] border border-[#e2e8f0] relative">
+							{/* Arrow pointing left */}
+							<div className="absolute top-1/2 -translate-y-1/2 -left-[7px]">
+								<div className="w-3 h-3 bg-white border-l border-b border-[#e2e8f0] rotate-45 rounded-[1px]" />
 							</div>
 
-							<div className="flex items-center gap-2 mb-2.5">
-								<div className="flex items-center justify-center size-[28px] rounded-lg bg-[#f59e0b]/15">
+							<div className="flex items-center gap-2.5 mb-2.5">
+								<div className="flex items-center justify-center size-[30px] rounded-lg bg-[#fffbeb] border border-[#fde68a]">
 									<svg width="14" height="14" viewBox="0 0 24 24" fill="none">
 										<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
 									</svg>
 								</div>
-								<span className="text-[13px] font-semibold text-white tracking-tight">Split Measurement</span>
+								<span className="text-[13px] font-semibold text-[#0f172a] tracking-tight">Split Measurement</span>
 							</div>
 
-							<p className="text-[12px] text-[#94a3b8] leading-[1.6] mb-3">
+							<p className="text-[12px] text-[#64748b] leading-[1.6] mb-3">
 								Divide this report across multiple roofing materials. Set a primary material and enter values for the rest — the primary auto-calculates.
 							</p>
 
-							<div className="flex gap-2">
-								<div className="flex items-center gap-1.5 bg-[#1e293b] rounded-md px-2 py-1">
+							<div className="flex gap-1.5 flex-wrap">
+								<div className="flex items-center gap-1.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-md px-2 py-1">
 									<div className="size-[5px] rounded-full bg-[#4F46E5]" />
-									<span className="text-[10px] text-[#cbd5e1] font-medium">Shingles</span>
+									<span className="text-[10px] text-[#475569] font-medium">Shingles</span>
 								</div>
-								<div className="flex items-center gap-1.5 bg-[#1e293b] rounded-md px-2 py-1">
+								<div className="flex items-center gap-1.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-md px-2 py-1">
 									<div className="size-[5px] rounded-full bg-[#E18026]" />
-									<span className="text-[10px] text-[#cbd5e1] font-medium">Metal</span>
+									<span className="text-[10px] text-[#475569] font-medium">Metal</span>
 								</div>
-								<div className="flex items-center gap-1.5 bg-[#1e293b] rounded-md px-2 py-1">
+								<div className="flex items-center gap-1.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-md px-2 py-1">
 									<div className="size-[5px] rounded-full bg-[#0891B2]" />
-									<span className="text-[10px] text-[#cbd5e1] font-medium">TPO</span>
+									<span className="text-[10px] text-[#475569] font-medium">TPO</span>
 								</div>
 							</div>
 						</div>
 					</motion.div>
 				)}
 			</AnimatePresence>
-		</div>
+		</>
 	);
 }
 
