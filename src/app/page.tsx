@@ -393,10 +393,6 @@ export default function LandingPage() {
 								context: 'Currently: edits are live, mismatch banner appears instantly. Risk: accidental edits show warnings immediately.',
 							},
 							{
-								q: 'Do we need permissions? Can any team member split, or only the job owner?',
-								context: 'Currently: anyone who can view the measurement tab can split. No permission model designed yet.',
-							},
-							{
 								q: 'What about partial splits? e.g., only split area but keep ridge/eave as shared?',
 								context: 'Currently: all splittable measurements are split. Some tokens (like pitch, stories) are marked non-splittable and copied to all children.',
 							},
