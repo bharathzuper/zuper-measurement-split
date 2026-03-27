@@ -103,25 +103,32 @@ function MaterialDropdown({
 
 /* ── Category group ── */
 function CategoryGroup({
-	category, splits, primaryId, values, searchQuery, onManualChange, onAutoFix,
+	category, splits, primaryId, values, searchQuery, hideZero, onManualChange, onAutoFix,
 }: {
 	category: TokenCategory;
 	splits: SplitDef[];
 	primaryId: string;
 	values: SplitValues;
 	searchQuery: string;
+	hideZero: boolean;
 	onManualChange: (splitId: string, tokenKey: string, val: number) => void;
 	onAutoFix: (tokenKey: string) => void;
 }) {
 	const [isOpen, setIsOpen] = useState(true);
-	const tokens = useMemo(() => TOKEN_DEFINITIONS.filter((t) => t.category === category), [category]);
-	const filtered = useMemo(() => {
-		if (!searchQuery.trim()) return tokens;
-		const q = searchQuery.toLowerCase();
-		return tokens.filter((t) => t.label.toLowerCase().includes(q));
-	}, [tokens, searchQuery]);
-
 	const parentValues = parentMeasurement.token_values;
+	const tokens = useMemo(() => TOKEN_DEFINITIONS.filter((t) => t.category === category && t.classification === 'splittable'), [category]);
+	const filtered = useMemo(() => {
+		let result = tokens;
+		if (hideZero) {
+			result = result.filter((t) => (parentValues[t.key] ?? 0) > 0);
+		}
+		if (searchQuery.trim()) {
+			const q = searchQuery.toLowerCase();
+			result = result.filter((t) => t.label.toLowerCase().includes(q));
+		}
+		return result;
+	}, [tokens, searchQuery, hideZero, parentValues]);
+
 	if (filtered.length === 0) return null;
 
 	const splitCols = splits.map(() => 'minmax(80px, 1fr)').join(' ');
@@ -232,6 +239,99 @@ function CategoryGroup({
 	);
 }
 
+/* ── Material-specific section (independent tokens like waste factor) ── */
+function MaterialSpecificSection({
+	splits, independentValues, onIndependentChange, searchQuery, hideZero,
+}: {
+	splits: SplitDef[];
+	independentValues: SplitValues;
+	onIndependentChange: (splitId: string, tokenKey: string, val: number) => void;
+	searchQuery: string;
+	hideZero: boolean;
+}) {
+	const [isOpen, setIsOpen] = useState(true);
+	const parentValues = parentMeasurement.token_values;
+	const independentTokens = useMemo(() => TOKEN_DEFINITIONS.filter(t => t.classification === 'independent'), []);
+	const filtered = useMemo(() => {
+		let result = independentTokens;
+		if (hideZero) {
+			result = result.filter(t => (parentValues[t.key] ?? 0) > 0);
+		}
+		if (searchQuery.trim()) {
+			const q = searchQuery.toLowerCase();
+			result = result.filter(t => t.label.toLowerCase().includes(q));
+		}
+		return result;
+	}, [independentTokens, searchQuery, hideZero, parentValues]);
+
+	if (filtered.length === 0) return null;
+
+	const splitCols = splits.map(() => 'minmax(80px, 1fr)').join(' ');
+	const colTemplate = `minmax(120px, 1.4fr) 60px ${splitCols}`;
+
+	return (
+		<div className="border-b border-[#e5e7eb] last:border-b-0">
+			<button type="button" onClick={() => setIsOpen((p) => !p)}
+				className="flex w-full items-center gap-2 px-5 py-2.5 text-left transition-colors duration-150 hover:bg-[#f8fafc] cursor-pointer">
+				<span className="text-[12px] font-semibold text-[#334155] tracking-wide">Material-Specific</span>
+				<span className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#eff6ff] px-1.5 text-[10px] font-bold text-[#3b82f6]">
+					{filtered.length}
+				</span>
+				<span className="text-[10px] text-[#94a3b8] italic ml-1">Set per material, not split from total</span>
+				<svg width="14" height="14" viewBox="0 0 16 16" fill="none"
+					className={`ml-auto shrink-0 transition-transform duration-200 ease-out ${isOpen ? 'rotate-180' : ''}`}>
+					<path d="M4 6L8 10L12 6" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+				</svg>
+			</button>
+
+			{isOpen && (
+				<div className="overflow-x-auto">
+					<div className="grid items-center gap-x-3 px-5 py-1.5 bg-[#f8fafc] border-y border-[#e5e7eb]"
+						style={{ gridTemplateColumns: colTemplate }}>
+						<span className="text-[10px] font-semibold text-[#94a3b8] uppercase tracking-widest">Setting</span>
+						<span className="text-[10px] font-semibold text-[#94a3b8] uppercase tracking-widest text-right">Unit</span>
+						{splits.map((s) => (
+							<span key={s.id} className="flex items-center justify-end gap-1.5 pr-0.5">
+								<span className="size-[6px] rounded-full shrink-0" style={{ backgroundColor: s.color }} />
+								<span className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider truncate">{s.trade_type}</span>
+							</span>
+						))}
+					</div>
+
+					{filtered.map((token) => (
+						<div key={token.key}
+							className="grid items-center gap-x-3 px-5 py-[6px] border-b border-[#f1f5f9] last:border-b-0 transition-colors duration-100 hover:bg-[#fafbfc]"
+							style={{ gridTemplateColumns: colTemplate }}>
+							<span className="text-[12px] text-[#334155] leading-snug truncate pr-1" title={token.label}>
+								{token.label}
+							</span>
+							<span className="text-[12px] text-[#94a3b8] text-right tabular-nums font-medium">
+								{token.unit}
+							</span>
+							{splits.map((s) => {
+								const val = independentValues[s.id]?.[token.key] ?? 0;
+								return (
+									<input
+										key={s.id}
+										type="number" step="any" min={0}
+										value={val || ''}
+										onChange={(e) => {
+											const raw = e.target.value;
+											onIndependentChange(s.id, token.key, raw === '' ? 0 : (parseFloat(raw) || 0));
+										}}
+										placeholder="0"
+										className="h-[30px] w-full rounded-md border border-[#e2e8f0] bg-white px-2 text-[12px] text-right tabular-nums outline-none transition-all duration-150 text-[#334155] hover:border-[#cbd5e1] focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/15"
+									/>
+								);
+							})}
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
 /* ── Main drawer ── */
 export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMeasurementDrawerProps) {
 	const [splits, setSplits] = useState<SplitDef[]>([
@@ -240,7 +340,9 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 	]);
 	const [primaryId, setPrimaryId] = useState('split-1');
 	const [values, setValues] = useState<SplitValues>({});
+	const [independentValues, setIndependentValues] = useState<SplitValues>({});
 	const [searchQuery, setSearchQuery] = useState('');
+	const [hideZeroValues, setHideZeroValues] = useState(true);
 	const [error, setError] = useState('');
 
 	useEffect(() => {
@@ -251,7 +353,9 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 			]);
 			setPrimaryId('split-1');
 			setValues({});
+			setIndependentValues({});
 			setSearchQuery('');
+			setHideZeroValues(true);
 			setError('');
 		}
 	}, [isOpen]);
@@ -295,6 +399,8 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		)));
 	}, []);
 
+	const splittableTokens = useMemo(() => TOKEN_DEFINITIONS.filter(t => t.classification === 'splittable'), []);
+
 	const handleManualChange = useCallback((splitId: string, tokenKey: string, val: number) => {
 		setValues((prev) => ({
 			...prev,
@@ -311,7 +417,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		setValues((prev) => {
 			const next = { ...prev };
 			const oldPrimaryVals: Record<string, number> = {};
-			TOKEN_DEFINITIONS.forEach((token) => {
+			splittableTokens.forEach((token) => {
 				const parentVal = parentVals[token.key] ?? 0;
 				const secSum = secondaries.reduce((sum, s) => sum + (prev[s.id]?.[token.key] ?? 0), 0);
 				oldPrimaryVals[token.key] = Math.max(0, Math.round((parentVal - secSum) * 10) / 10);
@@ -322,7 +428,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		});
 
 		setPrimaryId(newPrimaryId);
-	}, [primaryId, splits]);
+	}, [primaryId, splits, splittableTokens]);
 
 	const handleAutoFix = useCallback((tokenKey: string) => {
 		const parentVal = parentMeasurement.token_values[tokenKey] ?? 0;
@@ -352,20 +458,31 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		let overCount = 0;
 		const parentVals = parentMeasurement.token_values;
 		const secondaries = splits.filter((s) => s.id !== primaryId);
-		TOKEN_DEFINITIONS.forEach((token) => {
+		splittableTokens.forEach((token) => {
 			const parentVal = parentVals[token.key] ?? 0;
 			if (parentVal === 0) return;
 			const secSum = secondaries.reduce((sum, s) => sum + (values[s.id]?.[token.key] ?? 0), 0);
 			if (secSum > parentVal + 0.01) overCount++;
 		});
 		return { overCount };
-	}, [splits, primaryId, values]);
+	}, [splits, primaryId, values, splittableTokens]);
+
+	const handleIndependentChange = useCallback((splitId: string, tokenKey: string, val: number) => {
+		setIndependentValues((prev) => ({
+			...prev,
+			[splitId]: { ...(prev[splitId] ?? {}), [tokenKey]: val },
+		}));
+	}, []);
 
 	const hasAnyValues = useMemo(() =>
-		Object.values(values).some((sv) => Object.values(sv).some((v) => v > 0)),
-	[values]);
+		Object.values(values).some((sv) => Object.values(sv).some((v) => v > 0))
+		|| Object.values(independentValues).some((sv) => Object.values(sv).some((v) => v > 0)),
+	[values, independentValues]);
 
 	const canGenerate = splits.length >= 2 && !hasDuplicateTypes && rowIssues.overCount === 0;
+
+	const independentTokens = useMemo(() => TOKEN_DEFINITIONS.filter(t => t.classification === 'independent'), []);
+	const fixedTokens = useMemo(() => TOKEN_DEFINITIONS.filter(t => t.classification === 'fixed'), []);
 
 	const handleGenerate = useCallback(() => {
 		if (hasDuplicateTypes) { setError('Each split must have a unique material type'); return; }
@@ -374,7 +491,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		const secondaries = splits.filter((s) => s.id !== primaryId);
 		const finalScopes: SplitScope[] = splits.map((split) => {
 			const allocations: Record<string, number> = {};
-			TOKEN_DEFINITIONS.forEach((token) => {
+			splittableTokens.forEach((token) => {
 				const parentVal = parentValues[token.key] ?? 0;
 				if (split.id === primaryId) {
 					const secSum = secondaries.reduce(
@@ -384,6 +501,12 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 				} else {
 					allocations[token.key] = values[split.id]?.[token.key] ?? 0;
 				}
+			});
+			independentTokens.forEach((token) => {
+				allocations[token.key] = independentValues[split.id]?.[token.key] ?? 0;
+			});
+			fixedTokens.forEach((token) => {
+				allocations[token.key] = parentValues[token.key] ?? 0;
 			});
 			return {
 				id: split.id,
@@ -395,7 +518,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		});
 		onGenerate(generateChildCards(parentMeasurement, finalScopes));
 		onClose();
-	}, [hasDuplicateTypes, splits, primaryId, values, onGenerate, onClose]);
+	}, [hasDuplicateTypes, splits, primaryId, values, independentValues, splittableTokens, independentTokens, fixedTokens, onGenerate, onClose]);
 
 	if (!isOpen) return null;
 
@@ -488,16 +611,33 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 					)}
 				</div>
 
-				{/* Search */}
+				{/* Search + filter toolbar */}
 				<div className="shrink-0 border-b border-[#e5e7eb] px-6 py-2.5">
-					<div className="relative">
-						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-							<circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
-						</svg>
-						<input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-							placeholder="Search measurements..."
-							className="h-[32px] w-full rounded-md border border-[#e2e8f0] bg-white pl-9 pr-3 text-[12px] text-[#334155] placeholder-[#c4cdd5] outline-none transition-all duration-150 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/15"
-						/>
+					<div className="flex items-center gap-3">
+						<div className="relative flex-1">
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+								<circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+							</svg>
+							<input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+								placeholder="Search measurements..."
+								className="h-[32px] w-full rounded-md border border-[#e2e8f0] bg-white pl-9 pr-3 text-[12px] text-[#334155] placeholder-[#c4cdd5] outline-none transition-all duration-150 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/15"
+							/>
+						</div>
+						<button type="button" onClick={() => setHideZeroValues((p) => !p)}
+							className={`flex items-center gap-1.5 h-[32px] rounded-md border px-3 text-[11px] font-medium whitespace-nowrap transition-all duration-150 cursor-pointer ${
+								hideZeroValues
+									? 'border-[#3b82f6]/30 bg-[#eff6ff] text-[#3b82f6]'
+									: 'border-[#e2e8f0] bg-white text-[#94a3b8] hover:border-[#cbd5e1] hover:text-[#64748b]'
+							}`}>
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								{hideZeroValues ? (
+									<><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></>
+								) : (
+									<><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" /><path d="M1 1l22 22" /></>
+								)}
+							</svg>
+							{hideZeroValues ? 'With values only' : 'Show all'}
+						</button>
 					</div>
 				</div>
 
@@ -507,11 +647,21 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 						<CategoryGroup
 							key={cat} category={cat}
 							splits={splits} primaryId={primaryId} values={values}
-							searchQuery={searchQuery}
+							searchQuery={searchQuery} hideZero={hideZeroValues}
 							onManualChange={handleManualChange}
 							onAutoFix={handleAutoFix}
 						/>
 					))}
+
+					{/* Material-Specific Tokens (independent — not split from parent total) */}
+					{TOKEN_DEFINITIONS.filter(t => t.classification === 'independent').length > 0 && (
+						<MaterialSpecificSection
+							splits={splits}
+							independentValues={independentValues}
+							onIndependentChange={handleIndependentChange}
+							searchQuery={searchQuery} hideZero={hideZeroValues}
+						/>
+					)}
 				</div>
 
 				{/* Footer */}
@@ -543,7 +693,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 						</div>
 						<div className="flex items-center gap-2.5">
 							{hasAnyValues && (
-								<button type="button" onClick={() => setValues({})}
+								<button type="button" onClick={() => { setValues({}); setIndependentValues({}); }}
 									className="h-[36px] rounded-md px-3.5 text-[12px] font-medium text-[#94a3b8] transition-all duration-150 hover:text-[#ef4444] hover:bg-[#fef2f2] active:scale-[0.98]"
 									title="Reset all values">
 									Reset

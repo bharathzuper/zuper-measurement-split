@@ -63,6 +63,13 @@ function GroupCard({
 	const [isOpen, setIsOpen] = useState(defaultOpen);
 	const isDeleted = group.status === 'Deleted';
 
+	const COLUMN_HEADERS: Record<string, string> = {
+		'Roof Waste Factors': 'Waste Factor',
+		'Gutters': 'Measurement Token',
+		'Siding': 'Measurement Token',
+	};
+	const columnHeader = COLUMN_HEADERS[group.name] ?? 'Measurement';
+
 	return (
 		<div className="rounded-lg border border-[#e2e8f0] bg-white overflow-hidden">
 			<button
@@ -108,7 +115,7 @@ function GroupCard({
 						<thead>
 							<tr className="bg-[#f8fafc]">
 								<th className="px-5 py-2.5 text-left text-[13px] font-semibold text-[#334155]">
-									Measurement
+									{columnHeader}
 								</th>
 								<th className="px-5 py-2.5 text-left text-[13px] font-semibold text-[#334155]">
 									Value

@@ -616,7 +616,7 @@ function SplitComparisonTable({ parentCard, childCards, onSelectChild }: { paren
 	return (
 		<div className="space-y-3">
 			{CATEGORIES.map((category) => {
-				const tokens = TOKEN_DEFINITIONS.filter(t => t.category === category && (parentCard.token_values[t.key] ?? 0) > 0);
+				const tokens = TOKEN_DEFINITIONS.filter(t => t.category === category && t.classification !== 'fixed' && (parentCard.token_values[t.key] ?? 0) > 0);
 				if (tokens.length === 0) return null;
 				const isOpen = openCategories.has(category);
 

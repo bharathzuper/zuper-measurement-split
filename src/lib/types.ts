@@ -55,7 +55,7 @@ export interface MeasurementCard {
 	token_values: Record<string, number>;
 }
 
-export type TokenCategory = 'Roof Areas' | 'Linear Measurements' | 'General';
+export type TokenCategory = 'Roof Measurements' | 'Roof Pitch Measurements' | 'Roof Waste Factors' | 'Gutters' | 'Siding';
 
 export type TokenClassification = 'splittable' | 'fixed' | 'independent';
 

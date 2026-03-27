@@ -123,8 +123,8 @@ export default function LandingPage() {
 							<div className="pb-10 flex-1 min-w-0">
 								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Opens the measurement card</h3>
 								<p className="text-[14px] text-[#64748b] leading-[1.65]">
-									Angela navigates to the job, clicks the Measurements tab, and selects the EagleView report card.
-									She sees 5 accordion groups: Roof Measurements (21), Roof Pitch (19), Waste Factors (6), Gutters (12), Siding (18).
+									Angela navigates to the job, clicks the Measurements tab, and selects the HOVER report card.
+									She sees 5 accordion groups with real data: Roof Measurements (21), Roof Pitch Measurements (19), Roof Waste Factors (6), Gutters (12), Siding (18) — plus 2 deleted groups with historical values.
 								</p>
 							</div>
 						</motion.div>
@@ -184,15 +184,44 @@ export default function LandingPage() {
 								<div className="w-px flex-1 bg-[#e2e8f0] mt-2" />
 							</div>
 							<div className="pb-10 flex-1 min-w-0">
-								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Enters Metal values</h3>
+								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Enters Metal values — sees only what matters</h3>
 								<p className="text-[14px] text-[#64748b] leading-[1.65]">
-									A single table shows all materials as columns, with every measurement row visible.
-									Angela types <strong>800</strong> for Metal&apos;s total area. Instantly, Asphalt Shingles updates to <strong>2,400</strong> (3,200 − 800).
-									She fills in ridge length, eave length, etc. for Metal. Each time, Primary auto-adjusts.
+									The drawer automatically hides zero-value tokens. Out of 76 total tokens, Angela sees only ~22 rows that have actual data — no scrolling past empty pitch entries.
+									She can toggle <strong>&quot;Show all&quot;</strong> if needed.
+								</p>
+								<p className="text-[14px] text-[#64748b] leading-[1.65] mt-2">
+									She types <strong>600</strong> for Metal&apos;s total roof area (in squares). Instantly, Asphalt Shingles auto-calculates to <strong>~16</strong> (21.97 − 6).
+									She fills in ridge length, eave length, pitch areas for Metal. Each time, the Primary column auto-adjusts.
 								</p>
 								<p className="text-[14px] text-[#64748b] leading-[1.65] mt-2">
 									Every row shows a status: <span className="text-[#16a34a] font-medium">✓</span> when balanced, <span className="text-[#d97706] font-medium">⚠</span> if over-allocated.
 								</p>
+
+								<div className="mt-4 bg-white border border-[#e2e8f0] rounded-lg overflow-hidden">
+									<div className="px-4 py-2.5 bg-[#f8fafc] border-b border-[#e2e8f0]">
+										<p className="text-[12px] font-bold text-[#334155] tracking-wide">Token Classification</p>
+									</div>
+									<div className="divide-y divide-[#f1f5f9]">
+										<div className="px-4 py-2.5 flex gap-3">
+											<span className="text-[12px] font-semibold text-[#3b82f6] w-[90px] shrink-0">Splittable</span>
+											<span className="text-[13px] text-[#64748b] leading-snug">
+												Area, ridge, hip, eave, rake, drip edge, starter, pitch areas — divided from parent total across materials. <span className="text-[#94a3b8]">(37 tokens)</span>
+											</span>
+										</div>
+										<div className="px-4 py-2.5 flex gap-3">
+											<span className="text-[12px] font-semibold text-[#d97706] w-[90px] shrink-0">Independent</span>
+											<span className="text-[13px] text-[#64748b] leading-snug">
+												Waste factors — set per material, not split from total. Metal waste ≠ shingle waste. <span className="text-[#94a3b8]">(6 tokens)</span>
+											</span>
+										</div>
+										<div className="px-4 py-2.5 flex gap-3">
+											<span className="text-[12px] font-semibold text-[#94a3b8] w-[90px] shrink-0">Fixed</span>
+											<span className="text-[13px] text-[#64748b] leading-snug">
+												Gutters, siding, roof facets, perimeter, predominant pitch — copied to all children as-is. Not shown in split drawer. <span className="text-[#94a3b8]">(33 tokens)</span>
+											</span>
+										</div>
+									</div>
+								</div>
 							</div>
 						</motion.div>
 
@@ -393,12 +422,8 @@ export default function LandingPage() {
 								context: 'Currently: edits are live, mismatch banner appears instantly. Risk: accidental edits show warnings immediately.',
 							},
 							{
-								q: 'What about partial splits? e.g., only split area but keep ridge/eave as shared?',
-								context: 'Currently: all splittable measurements are split. Some tokens (like pitch, stories) are marked non-splittable and copied to all children.',
-							},
-							{
-								q: 'If a quote is already created from the parent, what happens after split?',
-								context: 'This needs backend design. Options: orphan the quote, auto-link to first child, or block split if downstream data exists.',
+								q: 'Token classification — are we categorizing all 76 tokens correctly?',
+								context: 'Currently: 37 splittable (divided from total), 6 independent/material-specific (waste factors — set per material), 33 fixed (gutters, siding, perimeter, facets — copied to all children). Roofers only see ~22 rows by default (zero-value tokens hidden). Need to validate: should Predominant Pitch and No of Roof Facets be independent instead of fixed?',
 							},
 							{
 								q: 'Should we support more than 4 materials?',
