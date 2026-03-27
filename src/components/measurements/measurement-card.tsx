@@ -63,7 +63,7 @@ export function MeasurementCardComponent({
 	const isSplitParent = card.status === 'Split';
 	const name = card.report_name || card.provider || 'Report';
 	const splitCount = card.split_child_ids?.length;
-	const totalArea = card.token_values['total_area'] ?? 0;
+	const totalArea = card.token_values['total_roof_area_squares'] ?? 0;
 	const tradeColor = card.trade_type ? TRADE_TYPE_COLORS[card.trade_type] ?? '#94a3b8' : '#94a3b8';
 	const pct = isChildSplit && parentTotalArea && parentTotalArea > 0
 		? Math.round((totalArea / parentTotalArea) * 100)
@@ -104,7 +104,7 @@ export function MeasurementCardComponent({
 							<span className="text-[20px] font-bold text-[#1e293b] tabular-nums leading-none">
 								{totalArea.toLocaleString()}
 							</span>
-							<span className="text-[11px] text-[#94a3b8] font-medium">sq ft</span>
+							<span className="text-[11px] text-[#94a3b8] font-medium">SQ</span>
 							{pct !== null && (
 								<span className="text-[11px] text-[#94a3b8] tabular-nums">· {pct}%</span>
 							)}

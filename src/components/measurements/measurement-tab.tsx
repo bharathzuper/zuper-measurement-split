@@ -303,7 +303,7 @@ export function MeasurementTab() {
 									}
 									const parentCard = group.cards[0];
 									const childCards = group.cards.slice(1);
-									const parentArea = parentCard.token_values['total_area'] ?? 0;
+									const parentArea = parentCard.token_values['total_roof_area_squares'] ?? 0;
 									return (
 										<motion.div key={`split-${parentCard.id}`} layout
 											initial={{ opacity: 0, scale: 0.95 }}
