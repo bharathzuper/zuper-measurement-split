@@ -221,7 +221,7 @@ function PrimaryMaterialAnimation() {
 				>
 					<div className="flex items-center gap-1 bg-[#f59e0b]/20 border border-[#f59e0b]/30 rounded-full px-2 py-0.5">
 						<svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-							<path d="M12 2L13.09 8.26L18 6L15.74 11.09L22 12L15.74 12.91L18 18L13.09 15.74L12 22L10.91 15.74L6 18L8.26 12.91L2 12L8.26 11.09L6 6L10.91 8.26L12 2Z" fill="#f59e0b" />
+							<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
 						</svg>
 						<span className="text-[9px] font-semibold text-[#f59e0b]">Auto-filled</span>
 					</div>
@@ -263,7 +263,7 @@ function ConnectedCardsAnimation() {
 						transition={{ delay: 1.0, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
 					>
 						<svg width="8" height="8" viewBox="0 0 24 24" fill="none">
-							<path d="M12 2L13.09 8.26L18 6L15.74 11.09L22 12L15.74 12.91L18 18L13.09 15.74L12 22L10.91 15.74L6 18L8.26 12.91L2 12L8.26 11.09L6 6L10.91 8.26L12 2Z" fill="#f59e0b" />
+							<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
 						</svg>
 						<span className="text-[8px] font-bold text-[#f59e0b]">Split&nbsp;2</span>
 					</motion.div>
@@ -347,7 +347,7 @@ function ConnectedCardsAnimation() {
 function StarIcon() {
 	return (
 		<svg width="8" height="8" viewBox="0 0 24 24" fill="none">
-			<path d="M12 2L13.09 8.26L18 6L15.74 11.09L22 12L15.74 12.91L18 18L13.09 15.74L12 22L10.91 15.74L6 18L8.26 12.91L2 12L8.26 11.09L6 6L10.91 8.26L12 2Z" fill="#a5b4fc" />
+			<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#a5b4fc" />
 		</svg>
 	);
 }
@@ -508,7 +508,7 @@ export function FeatureOnboarding({ onDismiss }: { onDismiss: () => void }) {
 								<div className="flex items-center gap-2 mb-3">
 									<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#f59e0b]/10 border border-[#f59e0b]/20">
 										<svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-											<path d="M12 2L13.09 8.26L18 6L15.74 11.09L22 12L15.74 12.91L18 18L13.09 15.74L12 22L10.91 15.74L6 18L8.26 12.91L2 12L8.26 11.09L6 6L10.91 8.26L12 2Z" fill="#f59e0b" />
+											<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
 										</svg>
 										<span className="text-[10px] font-semibold text-[#f59e0b] uppercase tracking-wider">{current.badge}</span>
 									</span>

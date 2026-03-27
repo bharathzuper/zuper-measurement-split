@@ -104,7 +104,7 @@ function SplitMeasurementMenuItem({ canSplit, onSplit }: { canSplit: boolean; on
 				<span className="flex items-center gap-2 w-full">
 					<span className="font-medium text-gray-700">Split Measurement</span>
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="ml-auto shrink-0">
-						<path d="M12 2L13.09 8.26L18 6L15.74 11.09L22 12L15.74 12.91L18 18L13.09 15.74L12 22L10.91 15.74L6 18L8.26 12.91L2 12L8.26 11.09L6 6L10.91 8.26L12 2Z" fill="#f59e0b" />
+						<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
 					</svg>
 				</span>
 			</DropdownMenuItem>
@@ -127,7 +127,7 @@ function SplitMeasurementMenuItem({ canSplit, onSplit }: { canSplit: boolean; on
 							<div className="flex items-center gap-2 mb-2.5">
 								<div className="flex items-center justify-center size-[28px] rounded-lg bg-[#f59e0b]/15">
 									<svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-										<path d="M12 2L13.09 8.26L18 6L15.74 11.09L22 12L15.74 12.91L18 18L13.09 15.74L12 22L10.91 15.74L6 18L8.26 12.91L2 12L8.26 11.09L6 6L10.91 8.26L12 2Z" fill="#f59e0b" />
+										<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
 									</svg>
 								</div>
 								<span className="text-[13px] font-semibold text-white tracking-tight">Split Measurement</span>
