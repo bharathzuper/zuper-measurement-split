@@ -445,7 +445,7 @@ export function FeatureOnboarding({ onDismiss }: { onDismiss: () => void }) {
 			{/* Backdrop: light frosted glass */}
 			<div
 				className="absolute inset-0"
-				style={{ backdropFilter: 'blur(16px) saturate(1.4)', WebkitBackdropFilter: 'blur(16px) saturate(1.4)', background: 'rgba(241,245,249,0.80)' }}
+				style={{ background: 'rgba(15,23,42,0.35)' }}
 				onClick={skip}
 			/>
 
