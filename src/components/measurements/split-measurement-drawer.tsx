@@ -680,16 +680,11 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 								<span className="text-[11px] text-[#ef4444] font-medium flex items-center gap-1">
 									{rowIssues.overCount} over-allocated — click to fix
 								</span>
-							) : hasAnyValues ? (
-								<span className="text-[11px] text-[#16a34a] font-medium flex items-center gap-1">
-									<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-									All rows balanced
-								</span>
-							) : (
+							) : !hasAnyValues ? (
 								<span className="text-[11px] text-[#94a3b8]">
 									Enter values for secondary materials to split
 								</span>
-							)}
+							) : null}
 						</div>
 						<div className="flex items-center gap-2.5">
 							{hasAnyValues && (

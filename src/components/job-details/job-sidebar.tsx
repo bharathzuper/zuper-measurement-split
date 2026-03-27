@@ -172,7 +172,7 @@ export function JobSidebar({
 			</div>
 
 			{/* Navigation / Status History tabs */}
-			<div className="flex h-[42px] shrink-0 items-end bg-white">
+			<div className="flex h-[42px] shrink-0 items-end bg-white justify-center">
 				<button
 					type="button"
 					onClick={() => setLeftPanelTab('NAVIGATION')}

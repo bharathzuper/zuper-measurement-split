@@ -81,6 +81,84 @@ function UndoSplitDialog({ splitCount, onConfirm, onCancel }: { splitCount: numb
 	);
 }
 
+function SplitMeasurementMenuItem({ canSplit, onSplit }: { canSplit: boolean; onSplit: () => void }) {
+	const [showTooltip, setShowTooltip] = useState(false);
+	const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+	const handleEnter = () => {
+		clearTimeout(timeoutRef.current);
+		timeoutRef.current = setTimeout(() => setShowTooltip(true), 400);
+	};
+	const handleLeave = () => {
+		clearTimeout(timeoutRef.current);
+		setShowTooltip(false);
+	};
+
+	return (
+		<div className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+			<DropdownMenuItem
+				className="text-base min-h-10 px-3 py-2 rounded-md flex items-center w-full cursor-pointer"
+				disabled={!canSplit}
+				onClick={() => { if (canSplit) onSplit(); }}
+			>
+				<span className="flex items-center gap-2 w-full">
+					<span className="font-medium text-gray-700">Split Measurement</span>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="ml-auto shrink-0">
+						<path d="M12 2L13.09 8.26L18 6L15.74 11.09L22 12L15.74 12.91L18 18L13.09 15.74L12 22L10.91 15.74L6 18L8.26 12.91L2 12L8.26 11.09L6 6L10.91 8.26L12 2Z" fill="#f59e0b" />
+					</svg>
+				</span>
+			</DropdownMenuItem>
+
+			<AnimatePresence>
+				{showTooltip && (
+					<motion.div
+						initial={{ opacity: 0, x: 8, scale: 0.96 }}
+						animate={{ opacity: 1, x: 0, scale: 1 }}
+						exit={{ opacity: 0, x: 8, scale: 0.96 }}
+						transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+						className="absolute right-full top-1/2 -translate-y-1/2 mr-3 z-50 w-[260px] pointer-events-none"
+					>
+						<div className="bg-[#0f172a] rounded-xl p-4 shadow-2xl shadow-black/25 relative">
+							{/* Arrow pointing right */}
+							<div className="absolute top-1/2 -translate-y-1/2 -right-[6px]">
+								<div className="w-3 h-3 bg-[#0f172a] rotate-45 rounded-[1px]" />
+							</div>
+
+							<div className="flex items-center gap-2 mb-2.5">
+								<div className="flex items-center justify-center size-[28px] rounded-lg bg-[#f59e0b]/15">
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+										<path d="M12 2L13.09 8.26L18 6L15.74 11.09L22 12L15.74 12.91L18 18L13.09 15.74L12 22L10.91 15.74L6 18L8.26 12.91L2 12L8.26 11.09L6 6L10.91 8.26L12 2Z" fill="#f59e0b" />
+									</svg>
+								</div>
+								<span className="text-[13px] font-semibold text-white tracking-tight">Split Measurement</span>
+							</div>
+
+							<p className="text-[12px] text-[#94a3b8] leading-[1.6] mb-3">
+								Divide this report across multiple roofing materials. Set a primary material and enter values for the rest — the primary auto-calculates.
+							</p>
+
+							<div className="flex gap-2">
+								<div className="flex items-center gap-1.5 bg-[#1e293b] rounded-md px-2 py-1">
+									<div className="size-[5px] rounded-full bg-[#4F46E5]" />
+									<span className="text-[10px] text-[#cbd5e1] font-medium">Shingles</span>
+								</div>
+								<div className="flex items-center gap-1.5 bg-[#1e293b] rounded-md px-2 py-1">
+									<div className="size-[5px] rounded-full bg-[#E18026]" />
+									<span className="text-[10px] text-[#cbd5e1] font-medium">Metal</span>
+								</div>
+								<div className="flex items-center gap-1.5 bg-[#1e293b] rounded-md px-2 py-1">
+									<div className="size-[5px] rounded-full bg-[#0891B2]" />
+									<span className="text-[10px] text-[#cbd5e1] font-medium">TPO</span>
+								</div>
+							</div>
+						</div>
+					</motion.div>
+				)}
+			</AnimatePresence>
+		</div>
+	);
+}
+
 export function MeasurementTab() {
 	const [splitChildCards, setSplitChildCards] = useState<MeasurementCard[] | null>(null);
 	const [splitDrawerOpen, setSplitDrawerOpen] = useState(false);
@@ -450,20 +528,10 @@ export function MeasurementTab() {
 												</DropdownMenuItem>
 											)}
 											{!isSelectedChildSplit && !isSelectedSplitParent && (
-												<DropdownMenuItem
-													className="text-base min-h-10 px-3 py-2 rounded-md flex items-center w-full cursor-pointer bg-blue-50 text-blue-700 focus:bg-blue-100 data-highlighted:bg-blue-100"
-													disabled={!canSplit}
-													onClick={() => {
-														if (canSplit) setSplitDrawerOpen(true);
-													}}
-												>
-													<span className="flex items-center gap-2 w-full">
-														<span className="font-medium text-blue-600">Split Measurement</span>
-														<span className="ml-auto text-[10px] font-semibold uppercase tracking-wide bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">
-															New
-														</span>
-													</span>
-												</DropdownMenuItem>
+												<SplitMeasurementMenuItem
+													canSplit={canSplit}
+													onSplit={() => setSplitDrawerOpen(true)}
+												/>
 											)}
 											{isSelectedSplitParent && (
 												<DropdownMenuItem
