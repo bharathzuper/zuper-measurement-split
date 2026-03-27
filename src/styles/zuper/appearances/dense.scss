@@ -1,0 +1,189 @@
+/* Variables */
+$zuper-vertical-navigation-width: 280;
+$zuper-vertical-navigation-dense-width: 80;
+
+zuper-vertical-navigation {
+
+    /* Dense appearance overrides */
+    &.zuper-vertical-navigation-appearance-dense {
+
+        &:not(.zuper-vertical-navigation-mode-over) {
+            width: #{$zuper-vertical-navigation-dense-width}px;
+            min-width: #{$zuper-vertical-navigation-dense-width}px;
+            max-width: #{$zuper-vertical-navigation-dense-width}px;
+
+            /* Left positioned */
+            &.zuper-vertical-navigation-position-left {
+
+                /* Side mode */
+                &.zuper-vertical-navigation-mode-side {
+                    margin-left: -#{$zuper-vertical-navigation-dense-width}px;
+                }
+
+                /* Opened */
+                &.zuper-vertical-navigation-opened {
+                    margin-left: 0;
+                }
+            }
+
+            /* Right positioned */
+            &.zuper-vertical-navigation-position-right {
+
+                /* Side mode */
+                &.zuper-vertical-navigation-mode-side {
+                    margin-right: -#{$zuper-vertical-navigation-dense-width}px;
+                }
+
+                /* Opened */
+                &.zuper-vertical-navigation-opened {
+                    margin-right: 0;
+                }
+
+                /* Aside wrapper */
+                .zuper-vertical-navigation-aside-wrapper {
+                    left: auto;
+                    right: #{$zuper-vertical-navigation-dense-width}px;
+                }
+
+                &.zuper-vertical-navigation-hover {
+
+                    .zuper-vertical-navigation-aside-wrapper {
+                        left: auto;
+                        right: #{$zuper-vertical-navigation-width}px;
+                    }
+                }
+            }
+        }
+
+        /* Wrapper */
+        .zuper-vertical-navigation-wrapper {
+
+            /* Content */
+            .zuper-vertical-navigation-content {
+
+                zuper-vertical-navigation-aside-item,
+                zuper-vertical-navigation-basic-item,
+                zuper-vertical-navigation-collapsable-item,
+                zuper-vertical-navigation-group-item {
+
+                    .zuper-vertical-navigation-item-wrapper {
+
+                        .zuper-vertical-navigation-item {
+                            width: #{$zuper-vertical-navigation-width}px - 24px;
+                            min-width: #{$zuper-vertical-navigation-width}px - 24px;
+                            max-width: #{$zuper-vertical-navigation-width}px - 24px;
+
+                            .zuper-vertical-navigation-item-arrow,
+                            .zuper-vertical-navigation-item-badge,
+                            .zuper-vertical-navigation-item-title-wrapper {
+                                transition: opacity 400ms cubic-bezier(0.25, 0.8, 0.25, 1);
+                            }
+                        }
+                    }
+                }
+
+                zuper-vertical-navigation-group-item {
+
+                    &:first-of-type {
+                        margin-top: 0;
+                    }
+                }
+            }
+        }
+
+        &:not(.zuper-vertical-navigation-hover):not(.zuper-vertical-navigation-mode-over) {
+
+            /* Wrapper */
+            .zuper-vertical-navigation-wrapper {
+
+                /* Content */
+                .zuper-vertical-navigation-content {
+
+                    .zuper-vertical-navigation-item-wrapper {
+
+                        .zuper-vertical-navigation-item {
+                            padding: 10px 16px;
+
+                            .zuper-vertical-navigation-item-arrow,
+                            .zuper-vertical-navigation-item-badge,
+                            .zuper-vertical-navigation-item-title-wrapper {
+                                white-space: nowrap;
+                                opacity: 0;
+                            }
+                        }
+                    }
+
+                    zuper-vertical-navigation-collapsable-item {
+
+                        .zuper-vertical-navigation-item-children {
+                            display: none;
+                        }
+                    }
+
+                    zuper-vertical-navigation-group-item {
+
+                        > .zuper-vertical-navigation-item-wrapper {
+
+                            .zuper-vertical-navigation-item {
+
+                                &:before {
+                                    content: '';
+                                    position: absolute;
+                                    top: 20px;
+                                    width: 23px;
+                                    border-top-width: 2px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /* Aside wrapper */
+        .zuper-vertical-navigation-aside-wrapper {
+            left: #{$zuper-vertical-navigation-dense-width}px;
+        }
+
+        /* Hover */
+        &.zuper-vertical-navigation-hover {
+
+            .zuper-vertical-navigation-wrapper {
+                width: #{$zuper-vertical-navigation-width}px;
+
+                .zuper-vertical-navigation-content {
+
+                    .zuper-vertical-navigation-item-wrapper {
+
+                        .zuper-vertical-navigation-item {
+
+                            .zuper-vertical-navigation-item-arrow,
+                            .zuper-vertical-navigation-item-badge,
+                            .zuper-vertical-navigation-item-title-wrapper {
+                                white-space: nowrap;
+                                animation: removeWhiteSpaceNoWrap 1ms linear 350ms;
+                                animation-fill-mode: forwards;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .zuper-vertical-navigation-aside-wrapper {
+                left: #{$zuper-vertical-navigation-width}px;
+            }
+        }
+    }
+}
+
+@keyframes removeWhiteSpaceNoWrap {
+    0% {
+        white-space: nowrap
+    }
+    99% {
+        white-space: nowrap
+    }
+    100% {
+        white-space: normal;
+    }
+}

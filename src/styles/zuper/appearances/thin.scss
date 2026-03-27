@@ -1,0 +1,97 @@
+/* Variables */
+$zuper-vertical-navigation-thin-width: 80;
+
+zuper-vertical-navigation {
+
+    /* Thin appearance overrides */
+    &.zuper-vertical-navigation-appearance-thin {
+        width: #{$zuper-vertical-navigation-thin-width}px;
+        min-width: #{$zuper-vertical-navigation-thin-width}px;
+        max-width: #{$zuper-vertical-navigation-thin-width}px;
+
+        /* Left positioned */
+        &.zuper-vertical-navigation-position-left {
+
+            &.zuper-vertical-navigation-mode-side {
+                margin-left: -#{$zuper-vertical-navigation-thin-width}px;
+            }
+
+            &.zuper-vertical-navigation-opened {
+                margin-left: 0;
+            }
+        }
+
+        /* Right positioned */
+        &.zuper-vertical-navigation-position-right {
+
+            &.zuper-vertical-navigation-mode-side {
+                margin-right: -#{$zuper-vertical-navigation-thin-width}px;
+            }
+
+            &.zuper-vertical-navigation-opened {
+                margin-right: 0;
+            }
+
+            .zuper-vertical-navigation-aside-wrapper {
+                left: auto;
+                right: #{$zuper-vertical-navigation-thin-width}px;
+            }
+        }
+
+        /* Wrapper */
+        .zuper-vertical-navigation-wrapper {
+
+            /* Content */
+            .zuper-vertical-navigation-content {
+
+                > zuper-vertical-navigation-aside-item,
+                > zuper-vertical-navigation-basic-item {
+                    flex-direction: column;
+                    justify-content: center;
+                    height: 64px;
+                    min-height: 64px;
+                    max-height: 64px;
+                    padding: 0 16px;
+
+                    .zuper-vertical-navigation-item-wrapper {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        .zuper-vertical-navigation-item {
+                            justify-content: center;
+                            padding: 12px;
+                            border-radius: 4px;
+
+                            .zuper-vertical-navigation-item-icon {
+                                margin: 0;
+                            }
+
+                            .zuper-vertical-navigation-item-arrow,
+                            .zuper-vertical-navigation-item-badge-content,
+                            .zuper-vertical-navigation-item-title-wrapper {
+                                display: none;
+                            }
+                        }
+                    }
+                }
+
+                > zuper-vertical-navigation-collapsable-item {
+                    display: none
+                }
+
+                > zuper-vertical-navigation-group-item {
+
+                    > .zuper-vertical-navigation-item-wrapper {
+                        display: none
+                    }
+                }
+            }
+        }
+
+        /* Aside wrapper */
+        .zuper-vertical-navigation-aside-wrapper {
+            left: #{$zuper-vertical-navigation-thin-width}px;
+        }
+    }
+}

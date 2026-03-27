@@ -1,0 +1,689 @@
+// ============================================
+// ZUPER DESIGN SYSTEM — Verbatim from source
+// ============================================
+
+// --- Variables ---
+$base-font: "Inter", ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+$title-font: "Inter", ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+
+// --- Root CSS Variables (from _misc.scss + color.scss + _typography.scss) ---
+:root {
+    --default-background-color: #94A3B8;
+    --product-primary-color: #E44A19;
+    --product-primary-light: #FCEDE8;
+    --color-job: #8A40D3;
+    --color-estimate: #E18026;
+    --color-invoice: #7755FF;
+    --color-service-contract: #E18026;
+    --color-user: #41C4ED;
+    --color-asset: #1451AE;
+    --color-broadcast: #fec135;
+    --color-report: #1F7CE8;
+    --color-task: #6366f1;
+    --color-primary-green: #28A138;
+    --title-font: #{$title-font};
+    --base-font: #{$base-font};
+}
+
+// --- Typography (from _typography.scss) ---
+html, body {
+    font-family: $base-font;
+    font-size: 14px;
+}
+
+.primary-font {
+    font-family: $base-font;
+}
+
+.title-font {
+    font-family: $title-font;
+    font-weight: 500;
+}
+
+// --- Product Color Utilities (from _misc.scss) ---
+.button-color {
+    background-color: #2795EB !important;
+    color: #ffffff;
+}
+
+button.bg-primary, .btn-primary, .btn-primary:hover {
+    background-color: var(--product-primary-color) !important;
+    border-color: var(--product-primary-color) !important;
+}
+
+.btn-primary, .btn-primary:hover {
+    color: #ffffff !important;
+    border: none !important;
+}
+
+.icon-primary {
+    color: var(--product-primary-color) !important;
+}
+
+.zuper-text-primary {
+    color: var(--product-primary-color) !important;
+}
+
+.bg-product-light {
+    background-color: var(--product-primary-light) !important;
+}
+
+.product-light {
+    color: var(--product-primary-light);
+}
+
+.product {
+    color: var(--product-primary-color);
+}
+
+.bg-product {
+    background-color: var(--product-primary-color);
+}
+
+.bg-disabled-light {
+    background-color: #EFF2F5;
+}
+
+.disabled-darker {
+    color: #BAC7D5;
+}
+
+// --- Color utilities (from color.scss) ---
+.job-icon-color { color: var(--color-job); }
+.estimate-icon-color { color: var(--color-estimate); }
+.invoice-icon-color { color: var(--color-invoice); }
+.service-contract-icon-color { color: var(--color-service-contract); }
+.user-icon-color { color: var(--color-user); }
+.asset-icon-color { color: var(--color-asset); }
+.broadcast-icon-color { color: var(--color-broadcast); }
+.report-icon-color { color: var(--color-report); }
+.task-icon-color { color: var(--color-task); }
+
+.nav-active {
+    border: 1px solid #b3ddff;
+    background: rgb(232, 244, 253) !important;
+}
+
+.text-dark-blue {
+    color: #005AA3;
+}
+
+.text-info {
+    color: #005AA3 !important;
+}
+
+.text-color-copy {
+    color: #0172CB;
+}
+
+// --- Tabler Icons cursor (from _misc.scss) ---
+.ti:not(.cursor-default):not(.ti-grid-dots):not(.cursor-inherit):not(.cursornotallowed):not(.cursor-move) {
+    cursor: pointer !important;
+}
+
+em.ti.cursornotallowed {
+    cursor: not-allowed !important;
+}
+
+.ti.cursor-inherit {
+    cursor: inherit !important;
+}
+
+// --- Navigation (from _misc.scss — converted from element selectors to class selectors) ---
+// In the Angular source, these target `zuper-vertical-navigation` element.
+// Here we use `.zuper-vertical-navigation-appearance-thin` which is applied as a class.
+
+.zuper-vertical-navigation-appearance-thin {
+    width: 65px !important;
+    min-width: 65px !important;
+    max-width: 65px !important;
+    background: #12344d !important;
+}
+
+.zuper-vertical-navigation-appearance-thin .zuper-vertical-navigation-wrapper .zuper-vertical-navigation-content > .zuper-vertical-navigation-basic-item,
+.zuper-vertical-navigation-appearance-thin .zuper-vertical-navigation-wrapper .zuper-vertical-navigation-content > .zuper-vertical-navigation-aside-item {
+    flex-direction: column;
+    justify-content: center;
+    height: 45px !important;
+    min-height: 45px !important;
+    max-height: 45px !important;
+    padding: 0 16px;
+    color: #FFF;
+}
+
+.zuper-vertical-navigation-appearance-thin .zuper-vertical-navigation-wrapper .zuper-vertical-navigation-content > .zuper-vertical-navigation-basic-item .zuper-vertical-navigation-item-wrapper,
+.zuper-vertical-navigation-appearance-thin .zuper-vertical-navigation-wrapper .zuper-vertical-navigation-content > .zuper-vertical-navigation-aside-item .zuper-vertical-navigation-item-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zuper-vertical-navigation-appearance-thin .zuper-vertical-navigation-wrapper .zuper-vertical-navigation-content > .zuper-vertical-navigation-basic-item .zuper-vertical-navigation-item-wrapper .zuper-vertical-navigation-item,
+.zuper-vertical-navigation-appearance-thin .zuper-vertical-navigation-wrapper .zuper-vertical-navigation-content > .zuper-vertical-navigation-aside-item .zuper-vertical-navigation-item-wrapper .zuper-vertical-navigation-item {
+    justify-content: center;
+    padding: 8px !important;
+    border-radius: 4px;
+}
+
+.zuper-vertical-navigation-appearance-thin .zuper-vertical-navigation-wrapper .zuper-vertical-navigation-content > .zuper-vertical-navigation-basic-item .zuper-vertical-navigation-item-wrapper .zuper-vertical-navigation-item .zuper-vertical-navigation-item-icon,
+.zuper-vertical-navigation-appearance-thin .zuper-vertical-navigation-wrapper .zuper-vertical-navigation-content > .zuper-vertical-navigation-aside-item .zuper-vertical-navigation-item-wrapper .zuper-vertical-navigation-item .zuper-vertical-navigation-item-icon {
+    margin: 0;
+    color: #fff;
+}
+
+.zuper-vertical-navigation-item-active {
+    background-color: var(--product-primary-color) !important;
+    background: var(--product-primary-color) !important;
+    border-radius: 8px !important;
+}
+
+.zuper-vertical-navigation-item-wrapper .zuper-vertical-navigation-item-icon {
+    height: 22px;
+    min-width: 22px;
+    width: 22px;
+}
+
+// --- Scrollbar Styles (from styles.scss) ---
+.zuper-scrollbar {
+    &::-webkit-scrollbar {
+        background-color: transparent !important;
+        width: 10px !important;
+        height: 10px !important;
+    }
+    &::-webkit-scrollbar-track {
+        background-color: transparent !important;
+    }
+    &::-webkit-scrollbar-track:hover {
+        background-color: #f4f4f4 !important;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: #babac0 !important;
+        border-radius: 16px !important;
+        border: 1px solid #f1f5f9 !important;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: #a0a0a5 !important;
+        border: 1px solid #f1f5f9 !important;
+    }
+    &::-webkit-scrollbar-button {
+        display: none !important;
+    }
+    scrollbar-width: thin;
+    scrollbar-color: #babac0 transparent;
+}
+
+.zuper-sidebar-scroller {
+    &::-webkit-scrollbar {
+        background-color: #fff !important;
+        width: 16px !important;
+        height: 16px !important;
+    }
+    &::-webkit-scrollbar-track {
+        background-color: #fff !important;
+    }
+    &::-webkit-scrollbar-track:hover {
+        background-color: #fff !important;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: #babac0 !important;
+        border-radius: 16px !important;
+        border: 4px solid #fff !important;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: #a0a0a5 !important;
+        border: 4px solid #f4f4f4 !important;
+    }
+    &::-webkit-scrollbar-button {
+        display: none !important;
+    }
+    scrollbar-width: thin !important;
+    scrollbar-color: #babac0 #fff !important;
+}
+
+// --- Layout Utilities (from _misc.scss) ---
+.details-left-panel {
+    width: 24rem !important;
+    min-width: 24rem !important;
+    max-width: 24rem !important;
+}
+
+.details-center-panel-container {
+    width: calc(100% - 24rem) !important;
+}
+
+.bg-detail-page {
+    background-color: #FCFCFC;
+}
+
+.as-split-gutter {
+    background-color: transparent !important;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-userassigned-bg {
+    background-color: #F5F7F9 !important;
+}
+
+.module-icon-color {
+    color: #005AA3 !important;
+    background-color: #D0E9FB !important;
+}
+
+// --- Top Bar Utilities (from thin.component) ---
+.nav-company-logo {
+    display: flex;
+    align-items: center;
+}
+
+.company-logo {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.bg-card {
+    background-color: #FFFFFF;
+}
+
+.flex-0 {
+    flex: 0 0 auto;
+}
+
+.flex-2 {
+    flex: 2 1 0%;
+}
+
+.z-49 {
+    z-index: 49;
+}
+
+.w-25 {
+    width: 6.25rem;
+}
+
+// --- Tab Underline (from _misc.scss) ---
+.nav-subtle-underline {
+    position: relative;
+
+    &:after {
+        content: "";
+        width: 40%;
+        display: block;
+        margin: auto;
+        margin-top: 5px;
+        height: 2px;
+        background: var(--product-primary-color);
+    }
+
+    &-custom:after {
+        width: 100%;
+    }
+}
+
+.selectedTab {
+    position: relative;
+}
+
+.selectedTab::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background-color: var(--product-primary-color);
+    top: 2rem;
+}
+
+// --- Breadcrumb (from breadcrumb.component.scss) ---
+.breadcrumb {
+    height: 58px;
+    background: #F5F5F5;
+    padding: 20px;
+    border-bottom: 1px solid #dadfe3;
+    box-shadow: 0 2px 4px 0 rgb(24 50 50 / 5%);
+    -webkit-box-shadow: 0 2px 4px 0 rgb(24 50 50 / 5%);
+}
+
+.breadcrumb-title {
+    max-width: 30rem;
+}
+
+.product-color {
+    color: var(--product-primary-color) !important;
+}
+
+.product-border-highlight {
+    border: 3px solid;
+    border-color: var(--product-primary-color) !important;
+}
+
+.product-border-highlight:hover {
+    background-color: var(--product-primary-light) !important;
+}
+
+// --- Border Utilities ---
+.border-light {
+    border-color: #E2E8F0;
+}
+
+// --- Job Details (from job-details.component.scss) ---
+.break-words {
+    word-break: break-word !important;
+}
+
+.timeline-container {
+    min-width: 18rem;
+}
+
+.timeline-icon {
+    left: -1.1rem;
+    height: 2.5rem;
+    width: 2.5rem;
+    color: var(--color-primary-green);
+    background: #FFF;
+    border-radius: 100%;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.timeline-status-time {
+    left: -4.5rem;
+    top: -65px;
+    width: 100px;
+    display: inline-block;
+    text-align: center;
+}
+
+.edit-action .action-icon {
+    visibility: hidden;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    min-width: 2.5rem !important;
+    min-height: 2.5rem !important;
+    font-size: 2.5rem !important;
+    line-height: 2.5rem !important;
+}
+
+.edit-action:hover .action-icon {
+    visibility: visible;
+}
+
+.status-history-container {
+    height: calc(100% - 5rem) !important;
+}
+
+.cursordefault {
+    cursor: default !important;
+}
+
+.primary-details-element {
+    height: 6rem !important;
+    min-height: 6rem !important;
+    max-height: 6rem !important;
+}
+
+.disabled-button {
+    opacity: 0.3 !important;
+    pointer-events: none;
+}
+
+@keyframes zoomIn {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.animate-zoom-in {
+    animation: zoomIn 0.4s ease-out;
+}
+
+// --- App Sidebar (from app-sidebar.component.scss) ---
+.highlight {
+    animation: shadowFade 2s 1;
+}
+
+@keyframes shadowFade {
+    0% { box-shadow: 0px 0px 0px rgba(228, 74, 25, 0); }
+    50% { box-shadow: 0px 0px 15px rgba(228, 74, 25, 0.75); }
+    100% { box-shadow: 0px 0px 0px rgba(228, 74, 25, 0); }
+}
+
+// --- Sidebar Data (from sidebar-data.component.scss) ---
+.sidebar-expansion-panel .sidebar-body-content {
+    padding: 0 0.5rem !important;
+}
+
+.next-line-truncate {
+    -webkit-line-clamp: 3 !important;
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    word-wrap: break-word !important;
+}
+
+.rounded-md-bottom {
+    border-bottom-left-radius: 0.625rem !important;
+    border-bottom-right-radius: 0.625rem !important;
+}
+
+.view-more-button {
+    background-color: var(--product-primary-color) !important;
+    color: white !important;
+    box-shadow: 0 0 10px #8d8d8d !important;
+}
+
+.label-height {
+    height: 1.2rem !important;
+}
+
+.label-status-active-ele {
+    color: #166534;
+    background-color: #dcfce7;
+}
+
+.card-shadow {
+    box-shadow: 0px 0px 0px 1px rgba(28, 59, 84, 0.05), 0px 2px 4px -1px rgba(28, 59, 84, 0.06) !important;
+}
+
+.filter-grayscale {
+    filter: grayscale(100%) !important;
+}
+
+// --- Measurement Tab (from property-measurements-tab.component.scss) ---
+@media (max-width: 1485px) {
+    .min-w-0-xs { min-width: 0; }
+    .flex-wrap-xs { flex-wrap: wrap; }
+}
+
+.hover-measurement::before {
+    content: '';
+    background-image: url('/assets/images/svgs/hover.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 20px;
+    width: 50px;
+    display: block;
+    margin: auto;
+}
+
+.hover::before {
+    content: '';
+    background-image: url('/assets/images/svgs/hover.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 20px;
+    width: 35px;
+    display: block;
+    margin: auto;
+}
+
+.manual-measurement::before {
+    content: '';
+    background-image: url('/assets/images/svgs/manual_measurement.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 20px;
+    width: 20px;
+    display: block;
+}
+
+.roofscope-measurement::before {
+    content: '';
+    background-image: url('/assets/images/png/roofscopelogo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 24px;
+    width: 90px;
+    display: block;
+}
+
+.eagleview::before {
+    content: '';
+    background-image: url('/assets/images/svgs/eagleview.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 20px;
+    width: 50px;
+    display: block;
+    margin: auto;
+}
+
+.eagle-card::before {
+    content: '';
+    background-image: url('/assets/images/png/eagle-card.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 20px;
+    width: 120px;
+    display: block;
+    margin: auto;
+}
+
+.eagle-menu::before {
+    content: '';
+    background-image: url('/assets/images/svgs/eagle-menu.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 25px;
+    width: 60px;
+    display: block;
+    margin: auto;
+}
+
+.measurement-cards-hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.measurement-cards-hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.roofscope-menu::before {
+    content: '';
+    background-image: url('/assets/images/png/roofscopelogo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 20px;
+    width: 35px;
+    display: block;
+    margin: auto;
+}
+
+.gaf-measurement::before {
+    content: '';
+    background-image: url('/assets/images/svgs/gaf.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 24px;
+    width: 50px;
+    display: block;
+    margin: auto;
+}
+
+.gaf-menu::before {
+    content: '';
+    background-image: url('/assets/images/svgs/gaf.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 20px;
+    width: 35px;
+    display: block;
+    margin: auto;
+}
+
+// --- Misc Utility Classes ---
+.required:after {
+    content: " *";
+    color: red;
+}
+
+.default-background-color {
+    background-color: var(--default-background-color);
+}
+
+.mandatory-field {
+    color: #e74c3c;
+    margin-left: 0.125rem;
+}
+
+.w-max-fit { max-width: fit-content !important; }
+.min-w-fit { min-width: fit-content !important; }
+.min-h-fit { min-height: fit-content !important; }
+.bg-inherit { background-color: inherit !important; }
+.text-break { word-break: break-word !important; }
+.white-space-preline { white-space: pre-line !important; }
+.max-h-25vh { max-height: 25vh !important; }
+.p-7 { padding: 1.75rem !important; }
+.right-14 { right: 3.5rem !important; }
+.appearance-none { appearance: none !important; -webkit-appearance: none !important; }
+.status-color-circle {
+    height: 11px !important;
+    width: 11px !important;
+    min-height: 11px !important;
+    min-width: 11px !important;
+    max-width: 11px !important;
+    max-height: 11px !important;
+}
+
+.clamped-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden;
+    text-overflow: ellipsis !important;
+    word-break: break-all !important;
+}
+
+.scrollbar-none {
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.grey-box {
+    background: repeating-linear-gradient(-55deg, #ddd, #ddd 10px, #eee 5px, #eee 20px) !important;
+    opacity: 0.5 !important;
+}
+
+.border-highlight {
+    border: 3px solid;
+    border-color: var(--product-primary-light) !important;
+}

@@ -1,0 +1,131 @@
+@media (max-width: 1485px) {
+  .min-w-0-xs {
+    min-width: 0;
+  }
+}
+@media (max-width: 1485px) {
+  .flex-wrap-xs {
+    flex-wrap: wrap;
+  }
+}
+
+.hover-measurement::before{
+  content: '';
+  background-image: url('/assets/images/svgs/hover.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 20px;
+  width: 50px;
+  display: block;
+  margin: auto;
+}
+
+.hover::before{
+  content: '';
+  background-image: url('/assets/images/svgs/hover.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 20px;
+  width: 35px;
+  display: block;
+  margin: auto;
+}
+
+.manual-measurement::before{
+  content: '';
+  background-image: url('/assets/images/svgs/manual_measurement.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 20px;
+  width: 20px;
+  display: block;
+}
+
+.roofscope-measurement::before{
+  content: '';
+  background-image: url('/assets/images/png/roofscopelogo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 24px;
+  width: 90px;
+  display: block;
+}
+
+.eagleview::before{
+  content: '';
+  background-image: url('/assets/images/svgs/eagleview.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 20px;
+  width: 50px;
+  display: block;
+  margin: auto;
+}
+
+.eagle-card::before{
+  content: '';
+  background-image: url('/assets/images/png/eagle-card.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 20px;
+  width: 120px;
+  display: block;
+  margin: auto;
+}
+
+.eagle-menu::before{
+  content: '';
+  background-image: url('/assets/images/svgs/eagle-menu.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 25px;
+  width: 60px;
+  display: block;
+  margin: auto;
+}
+
+.measurement-cards-hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.roofscope-menu:before{
+  content: '';
+  background-image: url('/assets/images/png/roofscopelogo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 20px;
+  width: 35px;
+  display: block;
+  margin: auto;
+}
+
+.gaf-measurement::before{
+  content: '';
+  background-image: url('/assets/images/svgs/gaf.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 24px;
+  width: 50px;
+  display: block;
+  margin: auto;
+}
+
+.gaf-menu::before{
+  content: '';
+  background-image: url('/assets/images/svgs/gaf.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 20px;
+  width: 35px;
+  display: block;
+  margin: auto;
+}

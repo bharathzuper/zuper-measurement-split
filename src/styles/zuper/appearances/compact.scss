@@ -1,0 +1,110 @@
+/* Variables */
+$zuper-vertical-navigation-compact-width: 112;
+
+zuper-vertical-navigation {
+
+    /* Compact appearance overrides */
+    &.zuper-vertical-navigation-appearance-compact {
+        width: #{$zuper-vertical-navigation-compact-width}px;
+        min-width: #{$zuper-vertical-navigation-compact-width}px;
+        max-width: #{$zuper-vertical-navigation-compact-width}px;
+
+        /* Left positioned */
+        &.zuper-vertical-navigation-position-left {
+
+            /* Side mode */
+            &.zuper-vertical-navigation-mode-side {
+                margin-left: -#{$zuper-vertical-navigation-compact-width}px;
+            }
+
+            /* Opened */
+            &.zuper-vertical-navigation-opened {
+                margin-left: 0;
+            }
+        }
+
+        /* Right positioned */
+        &.zuper-vertical-navigation-position-right {
+
+            /* Side mode */
+            &.zuper-vertical-navigation-mode-side {
+                margin-right: -#{$zuper-vertical-navigation-compact-width}px;
+            }
+
+            /* Opened */
+            &.zuper-vertical-navigation-opened {
+                margin-right: 0;
+            }
+
+            /* Aside wrapper */
+            .zuper-vertical-navigation-aside-wrapper {
+                left: auto;
+                right: #{$zuper-vertical-navigation-compact-width}px;
+            }
+        }
+
+        /* Wrapper */
+        .zuper-vertical-navigation-wrapper {
+
+            /* Content */
+            .zuper-vertical-navigation-content {
+
+                > zuper-vertical-navigation-aside-item,
+                > zuper-vertical-navigation-basic-item {
+
+                    .zuper-vertical-navigation-item-wrapper {
+                        margin: 4px 8px 0 8px;
+
+                        .zuper-vertical-navigation-item {
+                            flex-direction: column;
+                            justify-content: center;
+                            padding: 12px;
+                            border-radius: 6px;
+
+                            .zuper-vertical-navigation-item-icon {
+                                margin-right: 0;
+                            }
+
+                            .zuper-vertical-navigation-item-title-wrapper {
+                                margin-top: 8px;
+
+                                .zuper-vertical-navigation-item-title {
+                                    font-size: 12px;
+                                    font-weight: 500;
+                                    text-align: center;
+                                    line-height: 16px;
+                                }
+
+                                .zuper-vertical-navigation-item-subtitle {
+                                    display: none !important;
+                                }
+                            }
+
+                            .zuper-vertical-navigation-item-badge {
+                                position: absolute;
+                                top: 12px;
+                                left: 64px;
+                            }
+                        }
+                    }
+
+                    > zuper-vertical-navigation-collapsable-item {
+                        display: none
+                    }
+
+                    > zuper-vertical-navigation-group-item {
+
+                        > .zuper-vertical-navigation-item-wrapper {
+                            display: none
+                        }
+                    }
+                }
+            }
+        }
+
+        /* Aside wrapper */
+        .zuper-vertical-navigation-aside-wrapper {
+            left: #{$zuper-vertical-navigation-compact-width}px;
+        }
+    }
+}

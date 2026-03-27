@@ -1,0 +1,41 @@
+@import 'styles/appearances/default';
+@import 'styles/appearances/compact';
+@import 'styles/appearances/dense';
+@import 'styles/appearances/thin';
+
+zuper-vertical-navigation.zuper-vertical-navigation-appearance-thin .zuper-vertical-navigation-aside-wrapper{
+    background: transparent !important;
+    position: absolute;
+    top: 0;
+    border-radius: 5px !important;
+    width: 250px !important;
+    height: 124px;
+}
+
+zuper-vertical-navigation .zuper-vertical-navigation-aside-wrapper > zuper-vertical-navigation-aside-item{
+    background: #12344d;
+    padding: 12px 0 10px 0;
+    border-radius: 5px !important;
+    position: absolute;
+    top: 0;
+    z-index: 1050;
+    width: 250px;
+    border-width: 1px !important;
+
+    .zuper-vertical-navigation-item-wrapper .zuper-vertical-navigation-item .zuper-vertical-navigation-item-icon {
+        color: #fff;
+    }
+}
+
+zuper-vertical-navigation .zuper-vertical-navigation-item .zuper-vertical-navigation-item-title-wrapper{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; 
+    color: #fff;
+}
+
+.zuper-vertical-navigation-aside-overlay{
+    background-color: rgba(0, 0, 0, 0) !important;
+}

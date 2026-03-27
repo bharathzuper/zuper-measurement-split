@@ -1,0 +1,29 @@
+.breadcrumb {
+    height: 58px;
+    background: #F5F5F5;
+    padding: 20px;
+    border-bottom: 1px solid #dadfe3;
+    box-shadow: 0 2px 4px 0 rgb(24 50 50 / 5%);
+    -webkit-box-shadow: 0 2px 4px 0 rgb(24 50 50 / 5%);
+}
+
+li {
+    font-family: var(--title-font);
+}
+
+.breadcrumb-title {
+    max-width: 30rem;
+}
+
+.product-color{
+    color : var(--product-primary-color) !important;
+}
+
+.product-border-highlight{
+    border : 3px solid;
+    border-color: var(--product-primary-color) !important;
+}
+
+.product-border-highlight:hover{
+    background-color: var(--product-primary-light) !important;
+}

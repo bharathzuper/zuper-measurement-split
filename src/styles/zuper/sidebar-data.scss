@@ -1,0 +1,271 @@
+sidebar-data .mat-expansion-panel-header,
+sidebar-data .sidebar-expansion-panel .sidebar-body-content {
+    padding: 0 0.5rem !important;
+}
+
+sidebar-data .sidebar-expansion-panel .mat-expansion-panel-body {
+    padding: 0 !important;
+}
+
+sidebar-data .mat-accordion .mat-expansion-panel {
+    border-radius: 0 !important;
+}
+
+sidebar-data .mat-accordion .mat-expansion-panel,
+sidebar-data .mat-accordion .mat-expansion-panel:hover,
+sidebar-data .mat-accordion .mat-expansion-panel.mat-expanded {
+    box-shadow: none !important;
+}
+
+sidebar-data .mat-expansion-panel-header,
+sidebar-data .mat-expansion-panel-header.mat-expanded {
+    height: 3.25rem !important;
+}
+
+sidebar-data .mat-expansion-panel-header.mat-expanded {
+    border-bottom-width: 0.063rem !important;
+}
+
+sidebar-data .mat-expansion-panel-header .mat-expansion-indicator {
+    margin-top: 0.125rem !important;
+}
+
+sidebar-data .next-line-truncate {
+    -webkit-line-clamp: 3 !important;
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    word-wrap: break-word !important;
+}
+
+sidebar-data .card-userassigned-bg {
+    background-color: #F5F7F9 !important;
+}
+
+sidebar-data .note-file-uploader {
+    width: 50%;
+
+    .mat-mdc-dialog-container {
+        padding: 0 !important;
+    }
+}
+
+sidebar-data .payment-menu-ele .mat-mdc-icon-button {
+    width: 1.875rem !important;
+    height: 1.875rem !important;
+    max-height: 1.875rem !important;
+    min-height: 1.875rem !important;
+}
+
+sidebar-data .disabled-darker{
+    .ti:not(.cursor-default):not(.ti-grid-dots):not(.cursor-inherit) {
+        cursor: not-allowed !important;
+    }
+}
+
+sidebar-data .timeline-connector{
+  width: 2px !important;
+  height: 4px !important;
+  min-height: 4px !important;
+  max-height: 4px !important;
+}
+
+.mat-mdc-menu-panel.more-action-menu{
+  margin: 0.5rem 0 0 0 !important;
+  min-width: 0 !important;
+}
+
+.rounded-md-bottom {
+    border-bottom-left-radius: 0.625rem !important;
+    border-bottom-right-radius: 0.625rem !important;
+}
+
+.view-more-button {
+    background-color: var(--product-primary-color) !important;
+    color: white !important;
+    box-shadow: 0 0 10px #8d8d8d !important;
+}
+
+.label-height {
+    height: 1.2rem !important;
+}
+
+.label-status-active-ele {
+    color: #166534;
+    background-color: #dcfce7;
+}
+
+.icon-status-active {
+    fill: #166534;
+}
+
+.icon-status-inactive {
+    fill: #991b1b;
+}
+
+//********* Invoices Status ***********//
+.icon-invoice-status-DRAFT,
+.icon-invoice-status-YET_TO_SEND {
+    fill: #f39c12;
+}
+
+.icon-invoice-status-AWAIT_PAYMENT {
+    fill: #3498db;
+}
+
+.icon-invoice-status-PAID {
+    fill: #27ae60;
+}
+
+.icon-invoice-status-PARTIALLY_PAID {
+    fill: #e67e22;
+}
+
+.icon-invoice-status-BAD_DEBT,
+.icon-invoice-status-CANCELED {
+    fill: #c0392b;
+}
+
+.icon-invoice-status-ARCHIVED {
+    fill: #2C3E50;
+}
+
+.emp-profile-image-1 {
+    position: absolute;
+    right: 50%;
+    transform: translate(0%, -50%);
+}
+
+.emp-profile-image-2 {
+    position: absolute;
+    right: 25%;
+    transform: translate(50%, -50%);
+}
+
+.emp-profile-image-3 {
+    position: absolute;
+    right: 0%;
+    transform: translate(100%, -50%);
+}
+
+.emp-profile-count {
+    position: absolute;
+    right: -38%;
+    z-index: 0;
+    transform: translate(150%, -50%);
+}
+
+.assets-content,
+.properties-content {
+    width: calc(100% - 3.125rem) !important;
+}
+
+.card-shadow {
+    box-shadow: 0px 0px 0px 1px rgba(28, 59, 84, 0.05), 0px 2px 4px -1px rgba(28, 59, 84, 0.06) !important;
+}
+
+.job-assets-container {
+    .job-assets-status {
+        display: inline-block !important;
+    }
+
+    @media (min-width: 1440px) {
+        .job-assets-content {
+            min-width: 46% !important;
+        }
+
+        .job-assets-status {
+            min-width: 46% !important;
+        }
+    }
+
+    @media (min-width: 1400px) and (max-width: 1440px) {
+        .job-assets-content {
+            min-width: 6.875rem !important;
+        }
+
+        .job-assets-status {
+            max-width: 6.875rem !important;
+        }
+    }
+
+    @media (min-width: 1360px) and (max-width: 1400px) {
+        .job-assets-content {
+            min-width: 5.938rem !important;
+        }
+
+        .job-assets-status {
+            max-width: 5.938rem !important;
+        }
+    }
+
+    @media (min-width: 1280px) and (max-width: 1360px) {
+        .job-assets-content {
+            min-width: 5.313rem !important;
+        }
+
+        .job-assets-status {
+            max-width: 5.313rem !important;
+        }
+    }
+
+    @media (min-width: 1152px) and (max-width: 1280px) {
+        .job-assets-content {
+            min-width: 4.688rem !important;
+        }
+
+        .job-assets-status {
+            max-width: 4.688rem !important;
+        }
+    }
+
+    @media (min-width: 1024px) and (max-width: 1152px) {
+        .job-assets-content {
+            min-width: 3.438rem !important;
+        }
+
+        .job-assets-status {
+            max-width: 3.438rem !important;
+        }
+    }
+
+    @media (min-width: 960px) and (max-width: 1024px) {
+        .job-assets-content {
+            min-width: 2.5rem !important;
+        }
+
+        .job-assets-status {
+            max-width: 2.5rem !important;
+        }
+    }
+
+    @media (min-width: 800px) and (max-width: 960px) {
+        .job-assets-content {
+            min-width: 1.875rem !important;
+        }
+
+        .job-assets-status {
+            max-width: 1.875rem !important;
+        }
+    }
+}
+
+.mat-mdc-tooltip {
+    font-size: 12px;
+   white-space: pre-wrap;
+ }
+
+ .filter-grayscale {
+    filter: grayscale(100%) !important;
+ }
+ 
+sidebar-data .card-icon {
+  width: 16px !important;
+  height: 16px !important;
+
+  & svg {
+    width: inherit !important; 
+    height: inherit !important;
+  }
+}

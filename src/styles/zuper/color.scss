@@ -1,0 +1,57 @@
+:root 
+{
+--color-job: #8A40D3; 
+--color-estimate:#E18026;
+--color-invoice:#7755FF;
+--color-service-contract:#E18026;
+--color-user:#41C4ED;
+--color-asset:#1451AE;
+--color-broadcast:#fec135;
+--color-report:#1F7CE8;
+--color-task: #6366f1;
+--color-primary-green: #28A138;
+}
+.job-icon-color {
+    color: var(--color-job);
+}
+
+.estimate-icon-color {
+    color: var(--color-estimate);
+}
+
+.invoice-icon-color {
+    color: var(--color-invoice);
+}
+
+.service-contract-icon-color {
+    color: var(--color-service-contract);
+}
+
+.user-icon-color {
+    color: var(--color-user);
+}
+
+.asset-icon-color {
+    color: var(--color-asset);
+}
+
+.broadcast-icon-color {
+    color: var(--color-broadcast);
+}
+
+.report-icon-color{
+    color: var(--color-report);
+}
+
+.task-icon-color {
+    color: var(--color-task);
+}
+
+.nav-active {
+    border: 1px solid #b3ddff;
+    background: rgb(232, 244, 253) !important;
+}
+
+.text-dark-blue {
+    color: #005AA3;
+}
