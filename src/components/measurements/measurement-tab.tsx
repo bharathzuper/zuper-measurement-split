@@ -86,7 +86,7 @@ export function MeasurementTab() {
 	const [splitDrawerOpen, setSplitDrawerOpen] = useState(false);
 	const [toast, setToast] = useState<string | null>(null);
 	const [undoDialogOpen, setUndoDialogOpen] = useState(false);
-	const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+	const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
 	const isSplit = !!splitChildCards && splitChildCards.length > 0;
 
