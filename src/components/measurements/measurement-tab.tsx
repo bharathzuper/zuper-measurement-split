@@ -42,44 +42,6 @@ function SuccessToast({ message, onDismiss }: { message: string; onDismiss: () =
 	);
 }
 
-function UndoSplitDialog({ splitCount, onConfirm, onCancel }: { splitCount: number; onConfirm: () => void; onCancel: () => void }) {
-	return (
-		<>
-			<div className="fixed inset-0 bg-black/40 z-[55]" onClick={onCancel} />
-			<motion.div
-				initial={{ opacity: 0, scale: 0.95 }}
-				animate={{ opacity: 1, scale: 1 }}
-				exit={{ opacity: 0, scale: 0.95 }}
-				transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
-				className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[56] w-[420px] rounded-xl bg-white shadow-2xl shadow-black/15 overflow-hidden"
-			>
-				<div className="px-6 pt-6 pb-4">
-					<div className="flex items-center gap-3 mb-3">
-						<div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#fef2f2]">
-							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-								<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
-							</svg>
-						</div>
-						<h3 className="text-[15px] font-semibold text-[#1e293b]">Undo Split?</h3>
-					</div>
-					<p className="text-[13px] text-[#64748b] leading-relaxed">
-						This will remove all <strong className="text-[#334155] font-medium">{splitCount} split measurements</strong> and restore the original measurement to its completed state. This action cannot be undone.
-					</p>
-				</div>
-				<div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-[#f1f5f9] bg-[#fafbfc]">
-					<button type="button" onClick={onCancel}
-						className="h-[36px] rounded-md border border-[#e2e8f0] bg-white px-4 text-[13px] font-medium text-[#475569] transition-all hover:bg-[#f8fafc] hover:border-[#cbd5e1]">
-						Cancel
-					</button>
-					<button type="button" onClick={onConfirm}
-						className="h-[36px] rounded-md bg-[#ef4444] px-4 text-[13px] font-semibold text-white transition-all hover:bg-[#dc2626] shadow-sm shadow-[#ef4444]/20">
-						Undo Split
-					</button>
-				</div>
-			</motion.div>
-		</>
-	);
-}
 
 function KebabSpotlight({ buttonRef }: { buttonRef: React.RefObject<HTMLButtonElement | null> }) {
 	const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
@@ -231,7 +193,6 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 	const [splitChildCards, setSplitChildCards] = useState<MeasurementCard[] | null>(null);
 	const [splitDrawerOpen, setSplitDrawerOpen] = useState(false);
 	const [toast, setToast] = useState<string | null>(null);
-	const [undoDialogOpen, setUndoDialogOpen] = useState(false);
 	const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const kebabRef = useRef<HTMLButtonElement>(null);
 
@@ -290,12 +251,6 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 		showToast(`Split into ${childCards.length} materials`);
 	}, [showToast]);
 
-	const handleUndoSplit = useCallback(() => {
-		setSplitChildCards(null);
-		setSelectedCardId(parentMeasurement.id);
-		setUndoDialogOpen(false);
-		showToast('Split removed — original measurement restored');
-	}, [showToast]);
 
 	const handleChildValueChange = useCallback((key: string, value: number) => {
 		if (!selectedCard?.parent_id || !splitChildCards) return;
@@ -607,19 +562,6 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 													highlight={guidedStep === 2}
 												/>
 											)}
-											{isSelectedSplitParent && (
-												<DropdownMenuItem
-													className="text-base h-10 px-3 py-2 rounded-md flex items-center w-full cursor-pointer text-[#ef4444] focus:text-[#ef4444] focus:bg-[#fef2f2]"
-													onClick={() => setUndoDialogOpen(true)}
-												>
-													<span className="flex items-center gap-2">
-														<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-															<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
-														</svg>
-														Undo Split
-													</span>
-												</DropdownMenuItem>
-											)}
 											<DropdownMenuSub>
 												<DropdownMenuSubTrigger className="text-base h-10 px-3 py-2 rounded-md text-gray-700 flex items-center w-full cursor-pointer">
 													<span>Download</span>
@@ -707,15 +649,6 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 				{toast && <SuccessToast message={toast} onDismiss={() => setToast(null)} />}
 			</AnimatePresence>
 
-			<AnimatePresence>
-				{undoDialogOpen && (
-					<UndoSplitDialog
-						splitCount={splitChildCards?.length ?? 0}
-						onConfirm={handleUndoSplit}
-						onCancel={() => setUndoDialogOpen(false)}
-					/>
-				)}
-			</AnimatePresence>
 		</div>
 	);
 }
