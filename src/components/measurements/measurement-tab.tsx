@@ -428,6 +428,7 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 													totalCards={totalCards}
 													parentTotalArea={parentArea}
 													parentName={parentCard.report_name}
+													onParentClick={() => setSelectedCardId(parentCard.id)}
 												/>
 											))}
 										</motion.div>
@@ -619,29 +620,6 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 									exit={{ opacity: 0, y: -6 }}
 									transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
 								>
-									{isSelectedChildSplit && (
-										<button
-											type="button"
-											onClick={() => {
-												const parent = allCards.find(c => c.id === selectedCard.parent_id);
-												if (parent) setSelectedCardId(parent.id);
-											}}
-											className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f1f5f9] hover:border-[#cbd5e1] transition-all cursor-pointer group w-fit"
-										>
-											<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 group-hover:stroke-[#334155] transition-colors">
-												<path d="M15 18l-6-6 6-6" />
-											</svg>
-											<span className="text-[12px] text-[#64748b] group-hover:text-[#334155] transition-colors">
-												Parent:
-											</span>
-											<span className="text-[12px] font-medium text-[#334155] group-hover:text-[#0f172a] transition-colors">
-												{parentMeasurement.report_name}
-											</span>
-											<span className="text-[10px] text-[#94a3b8] group-hover:text-[#64748b] transition-colors">
-												({parentMeasurement.provider})
-											</span>
-										</button>
-									)}
 									<TokenTable card={selectedCard} onValueChange={isSelectedChildSplit ? handleChildValueChange : undefined} />
 								</motion.div>
 							</AnimatePresence>

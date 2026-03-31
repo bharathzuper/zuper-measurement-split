@@ -11,6 +11,7 @@ export interface MeasurementCardProps {
 	totalCards: number;
 	parentTotalArea?: number;
 	parentName?: string;
+	onParentClick?: () => void;
 	compact?: boolean;
 }
 
@@ -57,6 +58,7 @@ export function MeasurementCardComponent({
 	totalCards,
 	parentTotalArea,
 	parentName,
+	onParentClick,
 	compact,
 }: MeasurementCardProps) {
 	const isChildSplit = !!card.parent_id;
@@ -117,9 +119,20 @@ export function MeasurementCardComponent({
 				{/* Row 3: Parent breadcrumb */}
 				{parentName && (
 					<div className="mt-auto pt-2 min-w-0">
-						<span className="text-[11px] text-[#94a3b8] truncate block max-w-full" title={parentName}>
-							↳ {parentName}
-						</span>
+						{onParentClick ? (
+							<button
+								type="button"
+								onClick={(e) => { e.stopPropagation(); onParentClick(); }}
+								className="text-[11px] text-[#3b82f6] hover:text-[#2563eb] hover:underline truncate block max-w-full cursor-pointer transition-colors text-left"
+								title={`Go to ${parentName}`}
+							>
+								↳ {parentName}
+							</button>
+						) : (
+							<span className="text-[11px] text-[#94a3b8] truncate block max-w-full" title={parentName}>
+								↳ {parentName}
+							</span>
+						)}
 					</div>
 				)}
 			</div>
