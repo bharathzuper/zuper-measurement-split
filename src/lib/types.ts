@@ -50,7 +50,7 @@ export interface MeasurementCard {
 	completed_date?: string;
 	parent_id?: string;
 	scope_name?: string;
-	trade_type?: TradeType;
+	trade_type?: TradeType | string;
 	split_child_ids?: string[];
 	token_values: Record<string, number>;
 }
@@ -90,7 +90,7 @@ export type TradeType =
 export interface SplitScope {
 	id: string;
 	name: string;
-	trade_type: TradeType;
+	trade_type: TradeType | string;
 	color: string;
 	allocations: Record<string, number>;
 }

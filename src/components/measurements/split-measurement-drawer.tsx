@@ -19,22 +19,25 @@ interface SplitMeasurementDrawerProps {
 
 interface SplitDef {
 	id: string;
-	trade_type: TradeType;
+	trade_type: string;
 	color: string;
 }
 
 type SplitValues = Record<string, Record<string, number>>;
 
-/* ── Custom dropdown ── */
+/* ── Custom dropdown with inline edit ── */
 function MaterialDropdown({
 	value, usedTypes, onChange,
 }: {
-	value: TradeType;
+	value: string;
 	usedTypes: Set<string>;
-	onChange: (t: TradeType) => void;
+	onChange: (t: string) => void;
 }) {
 	const [open, setOpen] = useState(false);
+	const [editing, setEditing] = useState(false);
+	const [draft, setDraft] = useState(value);
 	const containerRef = useRef<HTMLDivElement>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
 		if (!open) return;
@@ -47,11 +50,26 @@ function MaterialDropdown({
 
 	useEffect(() => {
 		if (!open) return;
-		const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+		const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') { setOpen(false); setEditing(false); } };
 		document.addEventListener('keydown', handleEsc);
 		return () => document.removeEventListener('keydown', handleEsc);
 	}, [open]);
 
+	useEffect(() => {
+		if (editing && inputRef.current) {
+			inputRef.current.focus();
+			inputRef.current.select();
+		}
+	}, [editing]);
+
+	const commitEdit = () => {
+		const trimmed = draft.trim();
+		if (trimmed && trimmed !== value) onChange(trimmed);
+		setEditing(false);
+		setDraft(trimmed || value);
+	};
+
+	const isPreset = TRADE_TYPES.includes(value as typeof TRADE_TYPES[number]);
 	const color = TRADE_TYPE_COLORS[value] ?? '#94a3b8';
 
 	return (
@@ -69,16 +87,42 @@ function MaterialDropdown({
 				</svg>
 			</button>
 			{open && (
-				<div className="absolute top-full left-0 z-50 mt-1 w-[200px] rounded-lg border border-[#e5e7eb] bg-white py-1 shadow-lg shadow-black/8"
+				<div className="absolute top-full left-0 z-50 mt-1 w-[220px] rounded-lg border border-[#e5e7eb] bg-white shadow-lg shadow-black/8 overflow-hidden"
 					role="listbox" aria-label="Select material type">
-					<div className="max-h-[240px] overflow-y-auto">
+					{/* Custom name input */}
+					{editing ? (
+						<div className="px-2.5 pt-2 pb-1.5">
+							<div className="flex items-center gap-1.5">
+								<input
+									ref={inputRef}
+									value={draft}
+									onChange={(e) => setDraft(e.target.value)}
+									onKeyDown={(e) => { if (e.key === 'Enter') { commitEdit(); setOpen(false); } if (e.key === 'Escape') { setEditing(false); setDraft(value); } }}
+									onBlur={commitEdit}
+									maxLength={30}
+									className="flex-1 h-[30px] rounded-md border border-[#3b82f6] ring-2 ring-[#3b82f6]/15 bg-white px-2 text-[12px] text-[#0f172a] font-medium outline-none placeholder:text-[#cbd5e1]"
+									placeholder="Material name..."
+								/>
+							</div>
+						</div>
+					) : (
+						<button type="button"
+							onClick={() => { setDraft(value); setEditing(true); }}
+							className="flex w-full items-center gap-2 px-3 py-2 text-left text-[11px] text-[#3b82f6] font-medium hover:bg-[#f8fafc] transition-colors cursor-pointer border-b border-[#f1f5f9]">
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+								<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" />
+							</svg>
+							Custom name...
+						</button>
+					)}
+					<div className="max-h-[210px] overflow-y-auto py-1">
 						{TRADE_TYPES.map((t) => {
 							const isUsed = usedTypes.has(t) && t !== value;
 							const isSelected = t === value;
 							const tColor = TRADE_TYPE_COLORS[t] ?? '#94a3b8';
 							return (
 								<button key={t} type="button" role="option" aria-selected={isSelected} disabled={isUsed}
-									onClick={() => { onChange(t as TradeType); setOpen(false); }}
+									onClick={() => { onChange(t); setOpen(false); setEditing(false); }}
 									className={`flex w-full items-center gap-2.5 px-3 py-[7px] text-left text-[12px] transition-colors duration-100 ${
 										isUsed ? 'text-[#cbd5e1] cursor-not-allowed'
 											: isSelected ? 'bg-[#eff6ff] text-[#1e293b] font-medium'
@@ -95,6 +139,11 @@ function MaterialDropdown({
 							);
 						})}
 					</div>
+					{!isPreset && (
+						<div className="border-t border-[#f1f5f9] px-3 py-1.5">
+							<span className="text-[10px] text-[#94a3b8]">Custom: <span className="font-medium text-[#475569]">{value}</span></span>
+						</div>
+					)}
 				</div>
 			)}
 		</div>
@@ -373,7 +422,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 
 	const addSplit = useCallback(() => {
 		if (splits.length >= 4) return;
-		const nextType = (TRADE_TYPES.find((t) => !usedTradeTypes.has(t)) ?? 'Other') as TradeType;
+		const nextType = TRADE_TYPES.find((t) => !usedTradeTypes.has(t)) ?? 'Other';
 		setSplits((prev) => [...prev, {
 			id: `split-${Date.now()}`,
 			trade_type: nextType,
@@ -395,7 +444,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		}
 	}, [splits, primaryId]);
 
-	const setTradeType = useCallback((id: string, tt: TradeType) => {
+	const setTradeType = useCallback((id: string, tt: string) => {
 		setSplits((prev) => prev.map((s) => (
 			s.id === id ? { ...s, trade_type: tt, color: TRADE_TYPE_COLORS[tt] ?? '#94a3b8' } : s
 		)));
@@ -513,7 +562,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 			return {
 				id: split.id,
 				name: split.trade_type,
-				trade_type: split.trade_type as TradeType,
+				trade_type: split.trade_type,
 				color: split.color,
 				allocations,
 			};
