@@ -181,7 +181,7 @@ function CategoryGroup({
 	if (filtered.length === 0) return null;
 
 	const splitCols = splits.map(() => 'minmax(80px, 1fr)').join(' ');
-	const colTemplate = `minmax(120px, 1.4fr) 60px ${splitCols} 64px`;
+	const colTemplate = `minmax(120px, 1.4fr) 60px ${splitCols}`;
 
 	return (
 		<div className="border-b border-[#e5e7eb] last:border-b-0">
@@ -214,7 +214,6 @@ function CategoryGroup({
 							)}
 							</span>
 						))}
-						<span className="text-[9px] font-semibold text-[#94a3b8] uppercase tracking-widest text-right">Status</span>
 					</div>
 
 					{filtered.map((token) => {
@@ -240,10 +239,17 @@ function CategoryGroup({
 									if (s.id === primaryId) {
 										return (
 											<span key={s.id}
-												className={`h-[30px] w-full rounded-md px-2 flex items-center justify-end text-[12px] tabular-nums font-medium select-none transition-colors duration-150 ${
+												className={`h-[30px] w-full rounded-md px-2 flex items-center justify-end gap-1.5 text-[12px] tabular-nums font-medium select-none transition-colors duration-150 ${
 													isOver ? 'bg-[#fef2f2] text-[#ef4444]' : 'bg-[#f8fafc] text-[#475569]'
 												}`}>
 												{primaryVal.toLocaleString()}
+												{isOver && (
+													<button type="button" onClick={() => onAutoFix(token.key)}
+														className="text-[9px] font-bold text-[#ef4444] cursor-pointer rounded px-1 py-0.5 hover:bg-[#fee2e2] hover:underline decoration-[#ef4444]/40 shrink-0"
+														title="Auto-fix over-allocation">
+														fix
+													</button>
+												)}
 											</span>
 										);
 									}
@@ -268,19 +274,6 @@ function CategoryGroup({
 									);
 								})}
 
-								<span className="flex items-center justify-end pr-0.5">
-									{isOver ? (
-										<button type="button" onClick={() => onAutoFix(token.key)}
-											className="text-[10px] font-semibold text-[#ef4444] tabular-nums cursor-pointer rounded px-1 py-0.5 transition-all duration-150 hover:bg-[#fef2f2] hover:underline decoration-[#ef4444]/40"
-											title="Click to auto-fix">
-											+{Math.abs(primaryVal).toLocaleString()}
-										</button>
-									) : (
-										<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d4d4d8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-0 transition-opacity">
-											<path d="M20 6L9 17l-5-5" />
-										</svg>
-									)}
-								</span>
 							</div>
 						);
 					})}
