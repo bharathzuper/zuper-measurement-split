@@ -558,10 +558,11 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 											)}
 											{!isSelectedChildSplit && (
 												isSelectedSplitParent ? (
-													<div className="relative group">
-														<DropdownMenuItem
-															className="text-base min-h-10 px-3 py-2 rounded-md flex items-center w-full opacity-40 cursor-not-allowed"
-															disabled
+													<div className="relative group/split">
+														<div
+															className="text-base min-h-10 px-3 py-2 rounded-md flex items-center w-full opacity-40 cursor-not-allowed select-none"
+															role="menuitem"
+															aria-disabled="true"
 														>
 															<span className="flex items-center gap-2 w-full">
 																<span className="font-medium text-gray-400">Split Measurement</span>
@@ -569,8 +570,8 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 																	<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
 																</svg>
 															</span>
-														</DropdownMenuItem>
-														<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1.5 rounded-lg bg-[#0f172a] text-[11px] text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-lg z-50">
+														</div>
+														<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1.5 rounded-lg bg-[#0f172a] text-[11px] text-white whitespace-nowrap opacity-0 group-hover/split:opacity-100 transition-opacity duration-150 pointer-events-none shadow-lg z-50">
 															Remove child measurements to split again
 															<span className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-[#0f172a]" />
 														</span>
