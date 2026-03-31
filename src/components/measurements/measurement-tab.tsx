@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
 	DropdownMenu,
@@ -42,6 +43,49 @@ function SuccessToast({ message, onDismiss }: { message: string; onDismiss: () =
 	);
 }
 
+
+function DisabledSplitMenuItem() {
+	const rowRef = useRef<HTMLDivElement>(null);
+	const [tipPos, setTipPos] = useState<{ top: number; left: number } | null>(null);
+	const [show, setShow] = useState(false);
+
+	const handleEnter = useCallback(() => {
+		if (!rowRef.current) return;
+		const rect = rowRef.current.getBoundingClientRect();
+		setTipPos({ top: rect.top - 8, left: rect.left + rect.width / 2 });
+		setShow(true);
+	}, []);
+
+	const handleLeave = useCallback(() => setShow(false), []);
+
+	return (
+		<>
+			<div
+				ref={rowRef}
+				className="text-base min-h-10 px-3 py-2 rounded-md flex items-center w-full opacity-40 cursor-not-allowed select-none"
+				onMouseEnter={handleEnter}
+				onMouseLeave={handleLeave}
+			>
+				<span className="flex items-center gap-2 w-full">
+					<span className="font-medium text-gray-400">Split Measurement</span>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="ml-auto shrink-0 opacity-40">
+						<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
+					</svg>
+				</span>
+			</div>
+			{show && tipPos && createPortal(
+				<span
+					className="fixed px-2.5 py-1.5 rounded-lg bg-[#0f172a] text-[11px] text-white whitespace-nowrap shadow-lg pointer-events-none"
+					style={{ top: tipPos.top, left: tipPos.left, transform: 'translate(-50%, -100%)', zIndex: 99999 }}
+				>
+					Remove child measurements to split again
+					<span className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-[#0f172a]" />
+				</span>,
+				document.body
+			)}
+		</>
+	);
+}
 
 function KebabSpotlight({ buttonRef }: { buttonRef: React.RefObject<HTMLButtonElement | null> }) {
 	const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
@@ -558,24 +602,7 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 											)}
 											{!isSelectedChildSplit && (
 												isSelectedSplitParent ? (
-													<div className="relative group/split">
-														<div
-															className="text-base min-h-10 px-3 py-2 rounded-md flex items-center w-full opacity-40 cursor-not-allowed select-none"
-															role="menuitem"
-															aria-disabled="true"
-														>
-															<span className="flex items-center gap-2 w-full">
-																<span className="font-medium text-gray-400">Split Measurement</span>
-																<svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="ml-auto shrink-0 opacity-40">
-																	<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
-																</svg>
-															</span>
-														</div>
-														<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1.5 rounded-lg bg-[#0f172a] text-[11px] text-white whitespace-nowrap opacity-0 group-hover/split:opacity-100 transition-opacity duration-150 pointer-events-none shadow-lg z-50">
-															Remove child measurements to split again
-															<span className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-[#0f172a]" />
-														</span>
-													</div>
+													<DisabledSplitMenuItem />
 												) : (
 													<SplitMeasurementMenuItem
 														canSplit={canSplit}
