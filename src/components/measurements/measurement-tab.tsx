@@ -556,12 +556,32 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 													<span>Edit</span>
 												</DropdownMenuItem>
 											)}
-											{!isSelectedChildSplit && !isSelectedSplitParent && (
-												<SplitMeasurementMenuItem
-													canSplit={canSplit}
-													onSplit={() => { onGuidedStepChange?.(0); setSplitDrawerOpen(true); }}
-													highlight={guidedStep === 2}
-												/>
+											{!isSelectedChildSplit && (
+												isSelectedSplitParent ? (
+													<div className="relative group">
+														<DropdownMenuItem
+															className="text-base min-h-10 px-3 py-2 rounded-md flex items-center w-full opacity-40 cursor-not-allowed"
+															disabled
+														>
+															<span className="flex items-center gap-2 w-full">
+																<span className="font-medium text-gray-400">Split Measurement</span>
+																<svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="ml-auto shrink-0 opacity-40">
+																	<path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="#f59e0b" />
+																</svg>
+															</span>
+														</DropdownMenuItem>
+														<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1.5 rounded-lg bg-[#0f172a] text-[11px] text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-lg z-50">
+															Remove child measurements to split again
+															<span className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-[#0f172a]" />
+														</span>
+													</div>
+												) : (
+													<SplitMeasurementMenuItem
+														canSplit={canSplit}
+														onSplit={() => { onGuidedStepChange?.(0); setSplitDrawerOpen(true); }}
+														highlight={guidedStep === 2}
+													/>
+												)
 											)}
 											<DropdownMenuSub>
 												<DropdownMenuSubTrigger className="text-base h-10 px-3 py-2 rounded-md text-gray-700 flex items-center w-full cursor-pointer">
