@@ -123,7 +123,7 @@ export function MeasurementCardComponent({
 							<button
 								type="button"
 								onClick={(e) => { e.stopPropagation(); onParentClick(); }}
-								className="text-[11px] text-[#3b82f6] hover:text-[#2563eb] hover:underline truncate block max-w-full cursor-pointer transition-colors text-left"
+								className="text-[11px] text-[#94a3b8] hover:text-[#3b82f6] hover:underline truncate block max-w-full cursor-pointer transition-colors text-left"
 								title={`Go to ${parentName}`}
 							>
 								↳ {parentName}
