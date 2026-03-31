@@ -158,9 +158,11 @@ function CategoryGroup({
 							<span key={s.id} className="flex items-center justify-end gap-1.5 pr-0.5">
 								<span className="size-[6px] rounded-full shrink-0" style={{ backgroundColor: s.color }} />
 								<span className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider truncate">{s.trade_type}</span>
-								{s.id === primaryId && (
-									<span className="text-[7px] font-bold text-[#3b82f6] bg-[#eff6ff] rounded px-1 py-[1px] uppercase tracking-wider leading-none">Auto</span>
-								)}
+							{s.id === primaryId && (
+								<svg width="10" height="10" viewBox="0 0 24 24" fill="#3b82f6" stroke="#3b82f6" strokeWidth="1.5" className="shrink-0">
+									<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+								</svg>
+							)}
 							</span>
 						))}
 						<span className="text-[9px] font-semibold text-[#94a3b8] uppercase tracking-widest text-right">Status</span>
@@ -563,20 +565,29 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 										value={s.trade_type} usedTypes={usedTradeTypes}
 										onChange={(tt) => setTradeType(s.id, tt)}
 									/>
-									{isPrimary ? (
-										<span className="text-[9px] font-bold text-[#3b82f6] bg-[#eff6ff] rounded px-1.5 py-[3px] uppercase tracking-wider leading-none mr-0.5 select-none">
-											Primary
+								{isPrimary ? (
+									<span className="relative group flex items-center justify-center size-[28px] rounded-md mr-0.5 select-none cursor-default">
+										<svg width="14" height="14" viewBox="0 0 24 24" fill="#3b82f6" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+											<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+										</svg>
+										<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded-md bg-[#0f172a] text-[10px] font-medium text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-lg">
+											Primary material
+											<span className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-[#0f172a]" />
 										</span>
-									) : (
-										<>
-											<button type="button" onClick={() => swapPrimary(s.id)}
-												className="flex items-center justify-center size-[28px] rounded-md text-[#d4d4d8] transition-all duration-150 hover:text-[#3b82f6] hover:bg-[#eff6ff]"
-												aria-label={`Set ${s.trade_type} as primary`}
-												title="Set as primary">
-												<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-													<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-												</svg>
-											</button>
+									</span>
+								) : (
+									<>
+										<button type="button" onClick={() => swapPrimary(s.id)}
+											className="relative group flex items-center justify-center size-[28px] rounded-md text-[#d4d4d8] transition-all duration-150 hover:text-[#3b82f6] hover:bg-[#eff6ff]"
+											aria-label={`Set ${s.trade_type} as primary`}>
+											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+												<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+											</svg>
+											<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded-md bg-[#0f172a] text-[10px] font-medium text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-lg">
+												Set as primary
+												<span className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-[#0f172a]" />
+											</span>
+										</button>
 											{splits.length > 2 && (
 												<button type="button" onClick={() => removeSplit(s.id)}
 													className="flex items-center justify-center size-[28px] rounded-md text-[#d4d4d8] transition-all duration-150 hover:bg-[#fef2f2] hover:text-[#ef4444]"
