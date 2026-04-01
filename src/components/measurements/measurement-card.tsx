@@ -9,7 +9,6 @@ export interface MeasurementCardProps {
 	isSelected: boolean;
 	onSelect: (id: string) => void;
 	totalCards: number;
-	parentTotalArea?: number;
 	parentName?: string;
 	onParentClick?: () => void;
 	compact?: boolean;
@@ -56,7 +55,6 @@ export function MeasurementCardComponent({
 	isSelected,
 	onSelect,
 	totalCards,
-	parentTotalArea,
 	parentName,
 	onParentClick,
 	compact,
@@ -65,11 +63,7 @@ export function MeasurementCardComponent({
 	const isSplitParent = card.status === 'Split';
 	const name = card.report_name || card.provider || 'Report';
 	const splitCount = card.split_child_ids?.length;
-	const totalArea = card.token_values['total_roof_area_squares'] ?? 0;
-	const tradeColor = card.trade_type ? TRADE_TYPE_COLORS[card.trade_type] ?? '#94a3b8' : '#94a3b8';
-	const pct = isChildSplit && parentTotalArea && parentTotalArea > 0
-		? Math.round((totalArea / parentTotalArea) * 100)
-		: null;
+	const tradeColor = card.color ?? (card.trade_type ? TRADE_TYPE_COLORS[card.trade_type] ?? '#94a3b8' : '#94a3b8');
 	const displayStatus = isSplitParent ? 'Completed' : card.status;
 
 	if (isChildSplit) {
@@ -92,28 +86,16 @@ export function MeasurementCardComponent({
 					<div className="absolute top-0 left-0 right-0 h-[2px]" style={{ backgroundColor: tradeColor }} />
 				)}
 
-				{/* Row 1: Material name */}
+				{/* Row 1: Split name */}
 				<div className="min-w-0">
 					<span className="truncate text-[13px] font-medium text-[#1e293b] block">
 						{card.trade_type ?? name}
 					</span>
 				</div>
 
-				{/* Row 2: Hero area number */}
-				<div className="mt-1.5 flex items-baseline gap-1.5">
-					{totalArea > 0 ? (
-						<>
-							<span className="text-[20px] font-bold text-[#1e293b] tabular-nums leading-none">
-								{totalArea.toLocaleString()}
-							</span>
-							<span className="text-[11px] text-[#94a3b8] font-medium">SQ</span>
-							{pct !== null && (
-								<span className="text-[11px] text-[#94a3b8] tabular-nums">· {pct}%</span>
-							)}
-						</>
-					) : (
-						<span className="text-[13px] text-[#94a3b8]">No area assigned</span>
-					)}
+				{/* Row 2: Created date + status */}
+				<div className="mt-1 text-[13px] text-[#94a3b8]">
+					Split created on {card.completed_date ?? card.ordered_date}
 				</div>
 
 				{/* Row 3: Parent breadcrumb */}

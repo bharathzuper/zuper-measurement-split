@@ -51,6 +51,7 @@ export interface MeasurementCard {
 	parent_id?: string;
 	scope_name?: string;
 	trade_type?: TradeType | string;
+	color?: string;
 	split_child_ids?: string[];
 	token_values: Record<string, number>;
 }

@@ -208,21 +208,21 @@ function SplitMeasurementMenuItem({ canSplit, onSplit, highlight }: { canSplit: 
 							</div>
 
 							<p className="text-[12px] text-[#64748b] leading-[1.6] mb-3">
-								Divide this report across multiple roofing materials. Set a primary material and enter values for the rest — the primary auto-calculates.
+								Divide this report across multiple structures. Set a primary split and enter values for the rest — the primary auto-calculates.
 							</p>
 
 							<div className="flex gap-1.5 flex-wrap">
 								<div className="flex items-center gap-1.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-md px-2 py-1">
 									<div className="size-[5px] rounded-full bg-[#4F46E5]" />
-									<span className="text-[10px] text-[#475569] font-medium">Shingles</span>
+									<span className="text-[10px] text-[#475569] font-medium">Split 1</span>
 								</div>
 								<div className="flex items-center gap-1.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-md px-2 py-1">
 									<div className="size-[5px] rounded-full bg-[#E18026]" />
-									<span className="text-[10px] text-[#475569] font-medium">Metal</span>
+									<span className="text-[10px] text-[#475569] font-medium">Split 2</span>
 								</div>
 								<div className="flex items-center gap-1.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-md px-2 py-1">
 									<div className="size-[5px] rounded-full bg-[#0891B2]" />
-									<span className="text-[10px] text-[#475569] font-medium">TPO</span>
+									<span className="text-[10px] text-[#475569] font-medium">Split 3</span>
 								</div>
 							</div>
 						</div>
@@ -292,7 +292,7 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 				setSelectedCardId(childCards[0].id);
 			}
 		}, 50);
-		showToast(`Split into ${childCards.length} materials`);
+		showToast(`Split into ${childCards.length} parts`);
 	}, [showToast]);
 
 
@@ -449,7 +449,6 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 									}
 									const parentCard = group.cards[0];
 									const childCards = group.cards.slice(1);
-									const parentArea = parentCard.token_values['total_roof_area_squares'] ?? 0;
 									return (
 										<motion.div key={`split-${parentCard.id}`} layout
 											initial={{ opacity: 0, scale: 0.95 }}
@@ -470,7 +469,6 @@ export function MeasurementTab({ guidedStep, onGuidedStepChange }: { guidedStep?
 													isSelected={child.id === selectedCardId}
 													onSelect={setSelectedCardId}
 													totalCards={totalCards}
-													parentTotalArea={parentArea}
 													parentName={parentCard.report_name}
 													onParentClick={() => setSelectedCardId(parentCard.id)}
 												/>

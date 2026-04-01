@@ -285,15 +285,15 @@ export function createDefaultScopes(): SplitScope[] {
 	return [
 		{
 			id: 'scope-1',
-			name: 'Asphalt — Main House',
-			trade_type: 'Asphalt Shingle',
+			name: 'Split 1',
+			trade_type: 'Split 1',
 			color: SCOPE_COLORS[0],
 			allocations: {},
 		},
 		{
 			id: 'scope-2',
-			name: 'Metal — Garage',
-			trade_type: 'Metal',
+			name: 'Split 2',
+			trade_type: 'Split 2',
 			color: SCOPE_COLORS[1],
 			allocations: {},
 		},
@@ -314,6 +314,7 @@ export function generateChildCards(
 		parent_id: parent.id,
 		scope_name: scope.name,
 		trade_type: scope.trade_type,
+		color: scope.color,
 		token_values: { ...scope.allocations },
 	}));
 }

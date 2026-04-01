@@ -53,7 +53,7 @@ function SplitCardAnimation() {
 				<div className="size-[80px] rounded-full border-2 border-[#f59e0b]/30" />
 			</motion.div>
 
-			{/* Child card 1 — Shingles */}
+			{/* Child card 1 — Split 1 */}
 			<motion.div
 				className="absolute"
 				initial={{ opacity: 0, scale: 0.5, x: 0, y: 0 }}
@@ -64,7 +64,7 @@ function SplitCardAnimation() {
 					<div className="absolute top-0 left-0 w-full h-[3px] bg-[#4F46E5]" />
 					<div className="flex items-center gap-1 mt-0.5">
 						<div className="size-1.5 rounded-full bg-[#4F46E5]" />
-						<span className="text-[9px] font-semibold text-[#64748b] tracking-wide uppercase">Shingles</span>
+						<span className="text-[9px] font-semibold text-[#64748b] tracking-wide uppercase">Split 1</span>
 					</div>
 					<motion.div
 						className="text-[16px] font-bold text-[#0f172a] tabular-nums"
@@ -90,7 +90,7 @@ function SplitCardAnimation() {
 				</div>
 			</motion.div>
 
-			{/* Child card 2 — Metal */}
+			{/* Child card 2 — Split 2 */}
 			<motion.div
 				className="absolute"
 				initial={{ opacity: 0, scale: 0.5, x: 0, y: 0 }}
@@ -101,7 +101,7 @@ function SplitCardAnimation() {
 					<div className="absolute top-0 left-0 w-full h-[3px] bg-[#E18026]" />
 					<div className="flex items-center gap-1 mt-0.5">
 						<div className="size-1.5 rounded-full bg-[#E18026]" />
-						<span className="text-[9px] font-semibold text-[#64748b] tracking-wide uppercase">Metal</span>
+						<span className="text-[9px] font-semibold text-[#64748b] tracking-wide uppercase">Split 2</span>
 					</div>
 					<motion.div
 						className="text-[16px] font-bold text-[#0f172a] tabular-nums"
@@ -148,7 +148,7 @@ function SplitCardAnimation() {
 	);
 }
 
-function PrimaryMaterialAnimation() {
+function PrimarySplitAnimation() {
 	return (
 		<div className="relative w-full h-[200px] flex items-center justify-center">
 			<svg className="absolute inset-0 w-full h-full opacity-[0.3]" xmlns="http://www.w3.org/2000/svg">
@@ -175,7 +175,7 @@ function PrimaryMaterialAnimation() {
 						<svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d={SPARKLE_PATH} fill="#4F46E5" /></svg>
 						Primary
 					</div>
-					<div className="w-[72px] px-2 py-2 bg-[#fff7ed] text-[9px] font-semibold text-[#E18026] uppercase tracking-wider text-center border-b border-[#fed7aa]">Metal</div>
+					<div className="w-[72px] px-2 py-2 bg-[#fff7ed] text-[9px] font-semibold text-[#E18026] uppercase tracking-wider text-center border-b border-[#fed7aa]">Split 2</div>
 				</motion.div>
 
 				{/* Row data */}
@@ -291,7 +291,7 @@ function ConnectedCardsAnimation() {
 					>
 						<div className="w-[120px] h-[60px] rounded-lg bg-white border border-[#e2e8f0] shadow-sm flex flex-col items-center justify-center gap-0.5 relative overflow-hidden">
 							<div className="absolute top-0 left-0 w-full h-[2px] bg-[#4F46E5]" />
-							<span className="text-[8px] text-[#64748b] uppercase font-semibold mt-0.5">Shingles</span>
+							<span className="text-[8px] text-[#64748b] uppercase font-semibold mt-0.5">Split 1</span>
 							<span className="text-[13px] font-bold text-[#0f172a] tabular-nums">13.55 SQ</span>
 							<motion.div
 								className="flex items-center gap-0.5"
@@ -313,7 +313,7 @@ function ConnectedCardsAnimation() {
 					>
 						<div className="w-[120px] h-[60px] rounded-lg bg-white border border-[#e2e8f0] shadow-sm flex flex-col items-center justify-center gap-0.5 relative overflow-hidden">
 							<div className="absolute top-0 left-0 w-full h-[2px] bg-[#E18026]" />
-							<span className="text-[8px] text-[#64748b] uppercase font-semibold mt-0.5">Metal</span>
+							<span className="text-[8px] text-[#64748b] uppercase font-semibold mt-0.5">Split 2</span>
 							<span className="text-[13px] font-bold text-[#0f172a] tabular-nums">8.42 SQ</span>
 							<motion.div
 								className="flex items-center gap-0.5"
@@ -358,16 +358,16 @@ const STEPS = [
 		badge: 'New Feature',
 		title: 'Measurement Split',
 		subtitle: 'Divide one report into many',
-		description: 'Split your aerial measurement report across multiple roofing materials. Each material gets its own dedicated measurement card — ready for independent quoting.',
+		description: 'Split your aerial measurement report across multiple structures. Each split gets its own dedicated measurement card — ready for independent quoting.',
 		illustration: SplitCardAnimation,
 	},
 	{
 		id: 'primary',
 		badge: 'Smart Workflow',
-		title: 'Primary Material',
+		title: 'Primary Split',
 		subtitle: 'Enter less, calculate more',
-		description: 'Tag one material as primary. Enter values only for secondary materials — the primary auto-calculates everything else. No manual math needed.',
-		illustration: PrimaryMaterialAnimation,
+		description: 'Tag one split as primary. Enter values only for secondary splits — the primary auto-calculates everything else. No manual math needed.',
+		illustration: PrimarySplitAnimation,
 	},
 	{
 		id: 'connected',

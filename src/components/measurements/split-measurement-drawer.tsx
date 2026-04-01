@@ -4,12 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
 	TOKEN_DEFINITIONS,
 	CATEGORIES,
-	TRADE_TYPES,
-	TRADE_TYPE_COLORS,
 	parentMeasurement,
 	generateChildCards,
 } from '@/lib/mock-data';
-import type { MeasurementCard, SplitScope, TradeType, TokenCategory } from '@/lib/types';
+import type { MeasurementCard, SplitScope, TokenCategory } from '@/lib/types';
 
 interface SplitMeasurementDrawerProps {
 	isOpen: boolean;
@@ -19,133 +17,44 @@ interface SplitMeasurementDrawerProps {
 
 interface SplitDef {
 	id: string;
-	trade_type: string;
+	name: string;
 	color: string;
 }
 
 type SplitValues = Record<string, Record<string, number>>;
 
-/* ── Custom dropdown with inline edit ── */
-function MaterialDropdown({
-	value, usedTypes, onChange,
+/* ── Inline split name input ── */
+function SplitNameInput({
+	value, color, onChange,
 }: {
 	value: string;
-	usedTypes: Set<string>;
-	onChange: (t: string) => void;
+	color: string;
+	onChange: (name: string) => void;
 }) {
-	const [open, setOpen] = useState(false);
-	const [editing, setEditing] = useState(false);
 	const [draft, setDraft] = useState(value);
-	const containerRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	useEffect(() => {
-		if (!open) return;
-		const handleClick = (e: MouseEvent) => {
-			if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
-		};
-		document.addEventListener('mousedown', handleClick);
-		return () => document.removeEventListener('mousedown', handleClick);
-	}, [open]);
+	useEffect(() => { setDraft(value); }, [value]);
 
-	useEffect(() => {
-		if (!open) return;
-		const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') { setOpen(false); setEditing(false); } };
-		document.addEventListener('keydown', handleEsc);
-		return () => document.removeEventListener('keydown', handleEsc);
-	}, [open]);
-
-	useEffect(() => {
-		if (editing && inputRef.current) {
-			inputRef.current.focus();
-			inputRef.current.select();
-		}
-	}, [editing]);
-
-	const commitEdit = () => {
+	const commit = () => {
 		const trimmed = draft.trim();
 		if (trimmed && trimmed !== value) onChange(trimmed);
-		setEditing(false);
-		setDraft(trimmed || value);
+		else setDraft(value);
 	};
 
-	const isPreset = TRADE_TYPES.includes(value as typeof TRADE_TYPES[number]);
-	const color = TRADE_TYPE_COLORS[value] ?? '#94a3b8';
-
 	return (
-		<div ref={containerRef} className="relative">
-			<button type="button" onClick={() => setOpen((p) => !p)}
-				className={`flex items-center gap-2 h-[30px] rounded-md border bg-white pl-2.5 pr-2 text-[12px] font-medium text-[#334155] outline-none transition-all duration-150 cursor-pointer ${
-					open ? 'border-[#3b82f6] ring-2 ring-[#3b82f6]/15 shadow-sm'
-						: 'border-[#e2e8f0] hover:border-[#cbd5e1] hover:shadow-sm'
-				}`}>
-				<span className="size-[8px] rounded-full shrink-0" style={{ backgroundColor: color }} />
-				<span className="truncate max-w-[120px]">{value}</span>
-				<svg width="12" height="12" viewBox="0 0 16 16" fill="none"
-					className={`shrink-0 text-[#94a3b8] transition-transform duration-150 ${open ? 'rotate-180' : ''}`}>
-					<path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-				</svg>
-			</button>
-			{open && (
-				<div className="absolute top-full left-0 z-50 mt-1 w-[220px] rounded-lg border border-[#e5e7eb] bg-white shadow-lg shadow-black/8 overflow-hidden"
-					role="listbox" aria-label="Select material type">
-					{/* Custom name input */}
-					{editing ? (
-						<div className="px-2.5 pt-2 pb-1.5">
-							<div className="flex items-center gap-1.5">
-								<input
-									ref={inputRef}
-									value={draft}
-									onChange={(e) => setDraft(e.target.value)}
-									onKeyDown={(e) => { if (e.key === 'Enter') { commitEdit(); setOpen(false); } if (e.key === 'Escape') { setEditing(false); setDraft(value); } }}
-									onBlur={commitEdit}
-									maxLength={30}
-									className="flex-1 h-[30px] rounded-md border border-[#3b82f6] ring-2 ring-[#3b82f6]/15 bg-white px-2 text-[12px] text-[#0f172a] font-medium outline-none placeholder:text-[#cbd5e1]"
-									placeholder="Material name..."
-								/>
-							</div>
-						</div>
-					) : (
-						<button type="button"
-							onClick={() => { setDraft(value); setEditing(true); }}
-							className="flex w-full items-center gap-2 px-3 py-2 text-left text-[11px] text-[#3b82f6] font-medium hover:bg-[#f8fafc] transition-colors cursor-pointer border-b border-[#f1f5f9]">
-							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-								<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" />
-							</svg>
-							Custom name...
-						</button>
-					)}
-					<div className="max-h-[210px] overflow-y-auto py-1">
-						{TRADE_TYPES.map((t) => {
-							const isUsed = usedTypes.has(t) && t !== value;
-							const isSelected = t === value;
-							const tColor = TRADE_TYPE_COLORS[t] ?? '#94a3b8';
-							return (
-								<button key={t} type="button" role="option" aria-selected={isSelected} disabled={isUsed}
-									onClick={() => { onChange(t); setOpen(false); setEditing(false); }}
-									className={`flex w-full items-center gap-2.5 px-3 py-[7px] text-left text-[12px] transition-colors duration-100 ${
-										isUsed ? 'text-[#cbd5e1] cursor-not-allowed'
-											: isSelected ? 'bg-[#eff6ff] text-[#1e293b] font-medium'
-											: 'text-[#334155] hover:bg-[#f8fafc] cursor-pointer'
-									}`}>
-									<span className="size-[7px] rounded-full shrink-0" style={{ backgroundColor: isUsed ? '#e2e8f0' : tColor }} />
-									<span className="truncate">{t}</span>
-									{isSelected && (
-										<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="ml-auto shrink-0">
-											<path d="M20 6L9 17l-5-5" />
-										</svg>
-									)}
-								</button>
-							);
-						})}
-					</div>
-					{!isPreset && (
-						<div className="border-t border-[#f1f5f9] px-3 py-1.5">
-							<span className="text-[10px] text-[#94a3b8]">Custom: <span className="font-medium text-[#475569]">{value}</span></span>
-						</div>
-					)}
-				</div>
-			)}
+		<div className="flex items-center gap-2">
+			<span className="size-[8px] rounded-full shrink-0" style={{ backgroundColor: color }} />
+			<input
+				ref={inputRef}
+				value={draft}
+				onChange={(e) => setDraft(e.target.value)}
+				onBlur={commit}
+				onKeyDown={(e) => { if (e.key === 'Enter') { commit(); inputRef.current?.blur(); } if (e.key === 'Escape') { setDraft(value); inputRef.current?.blur(); } }}
+				maxLength={30}
+				className="h-[30px] w-[130px] rounded-md border border-[#e2e8f0] bg-white px-2 text-[12px] font-medium text-[#334155] outline-none transition-all duration-150 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/15 focus:shadow-sm hover:border-[#cbd5e1] placeholder:text-[#cbd5e1]"
+				placeholder="Split name..."
+			/>
 		</div>
 	);
 }
@@ -206,7 +115,7 @@ function CategoryGroup({
 						{splits.map((s) => (
 							<span key={s.id} className="flex items-center justify-end gap-1.5 pr-0.5">
 								<span className="size-[6px] rounded-full shrink-0" style={{ backgroundColor: s.color }} />
-								<span className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider truncate">{s.trade_type}</span>
+								<span className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider truncate">{s.name}</span>
 							{s.id === primaryId && (
 								<svg width="10" height="10" viewBox="0 0 24 24" fill="#3b82f6" stroke="#3b82f6" strokeWidth="1.5" className="shrink-0">
 									<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -283,8 +192,8 @@ function CategoryGroup({
 	);
 }
 
-/* ── Material-specific section (independent tokens like waste factor) ── */
-function MaterialSpecificSection({
+/* ── Split-specific section (independent tokens like waste factor) ── */
+function SplitSpecificSection({
 	splits, independentValues, onIndependentChange, searchQuery, hideZero,
 }: {
 	splits: SplitDef[];
@@ -317,11 +226,11 @@ function MaterialSpecificSection({
 		<div className="border-b border-[#e5e7eb] last:border-b-0">
 			<button type="button" onClick={() => setIsOpen((p) => !p)}
 				className="flex w-full items-center gap-2 px-5 py-2.5 text-left transition-colors duration-150 hover:bg-[#f8fafc] cursor-pointer">
-				<span className="text-[12px] font-semibold text-[#334155] tracking-wide">Material-Specific</span>
+				<span className="text-[12px] font-semibold text-[#334155] tracking-wide">Split-Specific</span>
 				<span className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#eff6ff] px-1.5 text-[10px] font-bold text-[#3b82f6]">
 					{filtered.length}
 				</span>
-				<span className="text-[10px] text-[#94a3b8] italic ml-1">Set per material, not split from total</span>
+				<span className="text-[10px] text-[#94a3b8] italic ml-1">Set per split, not divided from total</span>
 				<svg width="14" height="14" viewBox="0 0 16 16" fill="none"
 					className={`ml-auto shrink-0 transition-transform duration-200 ease-out ${isOpen ? 'rotate-180' : ''}`}>
 					<path d="M4 6L8 10L12 6" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -337,7 +246,7 @@ function MaterialSpecificSection({
 						{splits.map((s) => (
 							<span key={s.id} className="flex items-center justify-end gap-1.5 pr-0.5">
 								<span className="size-[6px] rounded-full shrink-0" style={{ backgroundColor: s.color }} />
-								<span className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider truncate">{s.trade_type}</span>
+								<span className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider truncate">{s.name}</span>
 							</span>
 						))}
 					</div>
@@ -378,9 +287,11 @@ function MaterialSpecificSection({
 
 /* ── Main drawer ── */
 export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMeasurementDrawerProps) {
+	const SPLIT_COLORS = ['#4F46E5', '#E18026', '#0891B2', '#28A138'];
+
 	const [splits, setSplits] = useState<SplitDef[]>([
-		{ id: 'split-1', trade_type: 'Asphalt Shingle', color: TRADE_TYPE_COLORS['Asphalt Shingle'] },
-		{ id: 'split-2', trade_type: 'Metal', color: TRADE_TYPE_COLORS['Metal'] },
+		{ id: 'split-1', name: 'Split 1', color: SPLIT_COLORS[0] },
+		{ id: 'split-2', name: 'Split 2', color: SPLIT_COLORS[1] },
 	]);
 	const [primaryId, setPrimaryId] = useState('split-1');
 	const [values, setValues] = useState<SplitValues>({});
@@ -392,8 +303,8 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 	useEffect(() => {
 		if (!isOpen) {
 			setSplits([
-				{ id: 'split-1', trade_type: 'Asphalt Shingle', color: TRADE_TYPE_COLORS['Asphalt Shingle'] },
-				{ id: 'split-2', trade_type: 'Metal', color: TRADE_TYPE_COLORS['Metal'] },
+				{ id: 'split-1', name: 'Split 1', color: SPLIT_COLORS[0] },
+				{ id: 'split-2', name: 'Split 2', color: SPLIT_COLORS[1] },
 			]);
 			setPrimaryId('split-1');
 			setValues({});
@@ -411,17 +322,15 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		return () => document.removeEventListener('keydown', handleEsc);
 	}, [isOpen, onClose]);
 
-	const usedTradeTypes = useMemo(() => new Set(splits.map((s) => s.trade_type)), [splits]);
-
 	const addSplit = useCallback(() => {
 		if (splits.length >= 4) return;
-		const nextType = TRADE_TYPES.find((t) => !usedTradeTypes.has(t)) ?? 'Other';
+		const idx = splits.length + 1;
 		setSplits((prev) => [...prev, {
 			id: `split-${Date.now()}`,
-			trade_type: nextType,
-			color: TRADE_TYPE_COLORS[nextType] ?? '#94a3b8',
+			name: `Split ${idx}`,
+			color: SPLIT_COLORS[prev.length % SPLIT_COLORS.length],
 		}]);
-	}, [splits.length, usedTradeTypes]);
+	}, [splits.length]);
 
 	const removeSplit = useCallback((id: string) => {
 		if (splits.length <= 2) return;
@@ -437,9 +346,9 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		}
 	}, [splits, primaryId]);
 
-	const setTradeType = useCallback((id: string, tt: string) => {
+	const setSplitName = useCallback((id: string, newName: string) => {
 		setSplits((prev) => prev.map((s) => (
-			s.id === id ? { ...s, trade_type: tt, color: TRADE_TYPE_COLORS[tt] ?? '#94a3b8' } : s
+			s.id === id ? { ...s, name: newName } : s
 		)));
 	}, []);
 
@@ -493,9 +402,9 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		}
 	}, [splits, primaryId, values, handleManualChange]);
 
-	const hasDuplicateTypes = useMemo(() => {
-		const types = splits.map((s) => s.trade_type);
-		return new Set(types).size !== types.length;
+	const hasDuplicateNames = useMemo(() => {
+		const names = splits.map((s) => s.name);
+		return new Set(names).size !== names.length;
 	}, [splits]);
 
 	const rowIssues = useMemo(() => {
@@ -523,13 +432,13 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		|| Object.values(independentValues).some((sv) => Object.values(sv).some((v) => v > 0)),
 	[values, independentValues]);
 
-	const canGenerate = splits.length >= 2 && !hasDuplicateTypes && rowIssues.overCount === 0;
+	const canGenerate = splits.length >= 2 && !hasDuplicateNames && rowIssues.overCount === 0;
 
 	const independentTokens = useMemo(() => TOKEN_DEFINITIONS.filter(t => t.classification === 'independent'), []);
 	const fixedTokens = useMemo(() => TOKEN_DEFINITIONS.filter(t => t.classification === 'fixed'), []);
 
 	const handleGenerate = useCallback(() => {
-		if (hasDuplicateTypes) { setError('Each split must have a unique material type'); return; }
+		if (hasDuplicateNames) { setError('Each split must have a unique name'); return; }
 		setError('');
 		const parentValues = parentMeasurement.token_values;
 		const secondaries = splits.filter((s) => s.id !== primaryId);
@@ -554,15 +463,15 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 			});
 			return {
 				id: split.id,
-				name: split.trade_type,
-				trade_type: split.trade_type,
+				name: split.name,
+				trade_type: split.name,
 				color: split.color,
 				allocations,
 			};
 		});
 		onGenerate(generateChildCards(parentMeasurement, finalScopes));
 		onClose();
-	}, [hasDuplicateTypes, splits, primaryId, values, independentValues, splittableTokens, independentTokens, fixedTokens, onGenerate, onClose]);
+	}, [hasDuplicateNames, splits, primaryId, values, independentValues, splittableTokens, independentTokens, fixedTokens, onGenerate, onClose]);
 
 	if (!isOpen) return null;
 
@@ -580,7 +489,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 						<div>
 							<h2 className="text-[17px] font-semibold text-[#0f172a] tracking-tight">Split Measurement</h2>
 							<p className="text-[12px] text-[#64748b] mt-0.5 leading-relaxed">
-								Enter secondary material values — the <span className="font-medium text-[#475569]">primary auto-adjusts</span>.
+								Enter secondary values — the <span className="font-medium text-[#475569]">primary auto-adjusts</span>.
 							</p>
 						</div>
 						<button type="button" onClick={onClose}
@@ -603,9 +512,9 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 									className={`flex items-center gap-0.5 rounded-lg border bg-white pl-1 pr-1 py-1 transition-all duration-150 ${
 										isPrimary ? 'border-[#3b82f6]/30 ring-1 ring-[#3b82f6]/10' : 'border-[#e5e7eb] hover:border-[#cbd5e1] hover:shadow-sm'
 									}`}>
-									<MaterialDropdown
-										value={s.trade_type} usedTypes={usedTradeTypes}
-										onChange={(tt) => setTradeType(s.id, tt)}
+									<SplitNameInput
+										value={s.name} color={s.color}
+										onChange={(n) => setSplitName(s.id, n)}
 									/>
 								{isPrimary ? (
 									<span className="relative group flex items-center justify-center size-[28px] rounded-md mr-0.5 select-none cursor-default">
@@ -613,7 +522,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 											<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
 										</svg>
 										<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded-md bg-[#0f172a] text-[10px] font-medium text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-lg">
-											Primary material
+											Primary split
 											<span className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-[#0f172a]" />
 										</span>
 									</span>
@@ -621,7 +530,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 									<>
 										<button type="button" onClick={() => swapPrimary(s.id)}
 											className="relative group flex items-center justify-center size-[28px] rounded-md text-[#d4d4d8] transition-all duration-150 hover:text-[#3b82f6] hover:bg-[#eff6ff]"
-											aria-label={`Set ${s.trade_type} as primary`}>
+											aria-label={`Set ${s.name} as primary`}>
 											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 												<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
 											</svg>
@@ -633,7 +542,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 											{splits.length > 2 && (
 												<button type="button" onClick={() => removeSplit(s.id)}
 													className="flex items-center justify-center size-[28px] rounded-md text-[#d4d4d8] transition-all duration-150 hover:bg-[#fef2f2] hover:text-[#ef4444]"
-													aria-label={`Remove ${s.trade_type}`}>
+													aria-label={`Remove ${s.name}`}>
 													<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
 														<path d="M18 6L6 18" /><path d="M6 6l12 12" />
 													</svg>
@@ -650,16 +559,16 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 								<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
 									<path d="M12 5v14" /><path d="M5 12h14" />
 								</svg>
-								Add material
+								Add split
 							</button>
 						)}
 					</div>
-					{hasDuplicateTypes && (
+					{hasDuplicateNames && (
 						<p className="text-[11px] text-[#ef4444] mt-2 flex items-center gap-1">
 							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 								<circle cx="12" cy="12" r="10" /><path d="M12 8v4" /><path d="M12 16h.01" />
 							</svg>
-							Each split must be a different material type.
+							Each split must have a unique name.
 						</p>
 					)}
 				</div>
@@ -706,9 +615,9 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 						/>
 					))}
 
-					{/* Material-Specific Tokens (independent — not split from parent total) */}
+					{/* Split-Specific Tokens (independent — not divided from parent total) */}
 					{TOKEN_DEFINITIONS.filter(t => t.classification === 'independent').length > 0 && (
-						<MaterialSpecificSection
+						<SplitSpecificSection
 							splits={splits}
 							independentValues={independentValues}
 							onIndependentChange={handleIndependentChange}
@@ -735,7 +644,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 								</span>
 							) : !hasAnyValues ? (
 								<span className="text-[11px] text-[#94a3b8]">
-									Enter values for secondary materials to split
+									Enter values for secondary splits
 								</span>
 							) : null}
 						</div>

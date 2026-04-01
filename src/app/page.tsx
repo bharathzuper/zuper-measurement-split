@@ -61,7 +61,7 @@ export default function LandingPage() {
 
 						<motion.p variants={fadeUp} custom={2}
 							className="text-[16px] text-[#64748b] max-w-[480px] leading-[1.7]">
-							A roofer gets one aerial report for a roof with two materials.
+							A roofer gets one aerial report covering multiple structures.
 							Today there&apos;s no way to split the numbers. Here&apos;s how we solve it.
 						</motion.p>
 
@@ -93,8 +93,7 @@ export default function LandingPage() {
 							The report came back: <strong>3,200 sq ft total area, 32 squares, 6/12 pitch</strong>.
 						</p>
 						<p className="text-[15px] text-[#334155] leading-[1.75] mt-3">
-							But Angela&apos;s job has <strong>two materials</strong> — the main house is <span className="font-semibold text-[#3b82f6]">Asphalt Shingles</span> and
-							the detached garage is <span className="font-semibold text-[#f59e0b]">Standing Seam Metal</span>.
+							But Angela&apos;s job covers <strong>two structures</strong> — the main house and a detached garage.
 							She needs separate measurement cards for each so they flow into <strong>separate quotes and work orders</strong>.
 						</p>
 						<p className="text-[15px] text-[#64748b] leading-[1.75] mt-3">
@@ -151,10 +150,10 @@ export default function LandingPage() {
 								<div className="w-px flex-1 bg-[#e2e8f0] mt-2" />
 							</div>
 							<div className="pb-10 flex-1 min-w-0">
-								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Picks her materials</h3>
+								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Names her splits</h3>
 								<p className="text-[14px] text-[#64748b] leading-[1.65]">
-									She adds two materials from the dropdown: <strong>Asphalt Shingles</strong> and <strong>Standing Seam Metal</strong>.
-									Up to 4 materials are supported. She can pick from 10+ roofing material types.
+									Two splits are created by default — <strong>Split 1</strong> and <strong>Split 2</strong>.
+									She renames them to whatever fits her job. Up to 4 splits are supported.
 								</p>
 							</div>
 						</motion.div>
@@ -166,13 +165,13 @@ export default function LandingPage() {
 								<div className="w-px flex-1 bg-[#e2e8f0] mt-2" />
 							</div>
 							<div className="pb-10 flex-1 min-w-0">
-								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Sets Asphalt Shingles as &quot;Primary&quot;</h3>
+								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Sets Split 1 as &quot;Primary&quot;</h3>
 								<p className="text-[14px] text-[#64748b] leading-[1.65] mb-3">
-									This is the key interaction. She tags the main material as <strong>Primary</strong>. This means:
+									This is the key interaction. She tags the main split as <strong>Primary</strong>. This means:
 								</p>
 								<div className="bg-[#fffbeb] border border-[#fde68a] rounded-lg px-4 py-3 text-[13px] text-[#92400e] leading-[1.65]">
-									The primary material&apos;s values are <strong>auto-calculated</strong> — always <code className="bg-[#fef3c7] px-1 rounded text-[12px]">Total − Σ(all other materials)</code>.
-									Angela only types values for the smaller/secondary materials. The primary absorbs the remainder.
+									The primary split&apos;s values are <strong>auto-calculated</strong> — always <code className="bg-[#fef3c7] px-1 rounded text-[12px]">Total − Σ(all other splits)</code>.
+									Angela only types values for the smaller/secondary splits. The primary absorbs the remainder.
 								</div>
 							</div>
 						</motion.div>
@@ -184,14 +183,14 @@ export default function LandingPage() {
 								<div className="w-px flex-1 bg-[#e2e8f0] mt-2" />
 							</div>
 							<div className="pb-10 flex-1 min-w-0">
-								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Enters Metal values — sees only what matters</h3>
+								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Enters Split 2 values — sees only what matters</h3>
 								<p className="text-[14px] text-[#64748b] leading-[1.65]">
 									The drawer automatically hides zero-value tokens. Out of 76 total tokens, Angela sees only ~22 rows that have actual data — no scrolling past empty pitch entries.
 									She can toggle <strong>&quot;Show all&quot;</strong> if needed.
 								</p>
 								<p className="text-[14px] text-[#64748b] leading-[1.65] mt-2">
-									She types <strong>600</strong> for Metal&apos;s total roof area (in squares). Instantly, Asphalt Shingles auto-calculates to <strong>~16</strong> (21.97 − 6).
-									She fills in ridge length, eave length, pitch areas for Metal. Each time, the Primary column auto-adjusts.
+									She types <strong>600</strong> for Split 2&apos;s total roof area (in squares). Instantly, Split 1 auto-calculates to <strong>~16</strong> (21.97 − 6).
+									She fills in ridge length, eave length, pitch areas for Split 2. Each time, the Primary column auto-adjusts.
 								</p>
 								<p className="text-[14px] text-[#64748b] leading-[1.65] mt-2">
 									Every row shows a status: <span className="text-[#16a34a] font-medium">✓</span> when balanced, <span className="text-[#d97706] font-medium">⚠</span> if over-allocated.
@@ -205,13 +204,13 @@ export default function LandingPage() {
 										<div className="px-4 py-2.5 flex gap-3">
 											<span className="text-[12px] font-semibold text-[#3b82f6] w-[90px] shrink-0">Splittable</span>
 											<span className="text-[13px] text-[#64748b] leading-snug">
-												Area, ridge, hip, eave, rake, drip edge, starter, pitch areas — divided from parent total across materials. <span className="text-[#94a3b8]">(37 tokens)</span>
+												Area, ridge, hip, eave, rake, drip edge, starter, pitch areas — divided from parent total across splits. <span className="text-[#94a3b8]">(37 tokens)</span>
 											</span>
 										</div>
 										<div className="px-4 py-2.5 flex gap-3">
 											<span className="text-[12px] font-semibold text-[#d97706] w-[90px] shrink-0">Independent</span>
 											<span className="text-[13px] text-[#64748b] leading-snug">
-												Waste factors — set per material, not split from total. Metal waste ≠ shingle waste. <span className="text-[#94a3b8]">(6 tokens)</span>
+												Waste factors — set per split, not divided from total. Each structure can have its own waste percentage. <span className="text-[#94a3b8]">(6 tokens)</span>
 											</span>
 										</div>
 										<div className="px-4 py-2.5 flex gap-3">
@@ -235,8 +234,8 @@ export default function LandingPage() {
 								<p className="text-[14px] text-[#64748b] leading-[1.65]">
 									She clicks <strong>Create Split</strong> (only enabled when all values balance).
 									The drawer closes. The original card locks with a &quot;Split · 2&quot; badge.
-									Two new child cards appear grouped next to it in the carousel — one per material.
-									A toast confirms: &quot;Split into 2 materials.&quot;
+									Two new child cards appear grouped next to it in the carousel — one per split.
+									A toast confirms: &quot;Split into 2 parts.&quot;
 								</p>
 							</div>
 						</motion.div>
@@ -259,7 +258,7 @@ export default function LandingPage() {
 							<h3 className="text-[14px] font-bold text-[#0f172a] mb-2">Card carousel</h3>
 							<p className="text-[14px] text-[#64748b] leading-[1.65]">
 								Parent and child cards are visually grouped in a dashed container. The parent shows &quot;Split · 2&quot;
-								next to its status badge. Child cards show their material name, area, percentage, and
+								next to its status badge. Child cards show their split name, area, percentage, and
 								a breadcrumb back to the parent (&quot;↳ EagleView Report&quot;).
 							</p>
 						</div>
@@ -268,7 +267,7 @@ export default function LandingPage() {
 							<h3 className="text-[14px] font-bold text-[#0f172a] mb-2">Clicking the parent card</h3>
 							<p className="text-[14px] text-[#64748b] leading-[1.65]">
 								Shows a <strong>comparison table</strong> — same accordion groups, but with columns for
-								Total, Asphalt Shingles, and Metal side-by-side. If a child was edited and values don&apos;t add up,
+								Total, Split 1, and Split 2 side-by-side. If a child was edited and values don&apos;t add up,
 								a yellow mismatch banner appears with a per-row breakdown.
 							</p>
 						</div>
@@ -276,7 +275,7 @@ export default function LandingPage() {
 						<div className="border-t border-[#f1f5f9] pt-5">
 							<h3 className="text-[14px] font-bold text-[#0f172a] mb-2">Clicking a child card</h3>
 							<p className="text-[14px] text-[#64748b] leading-[1.65]">
-								Shows that material&apos;s measurements in the same grouped accordion format.
+								Shows that split&apos;s measurements in the same grouped accordion format.
 								Values are editable — click the pencil at the group header level to modify.
 								Each child card flows independently into quotes and work orders.
 							</p>
@@ -304,20 +303,20 @@ export default function LandingPage() {
 					<motion.div variants={fadeUp} custom={1} className="space-y-3">
 						{[
 							{
-								q: 'Angela enters 2,000 for Metal but total is only 3,200 with two other materials?',
-								a: 'Per-row status indicators turn amber immediately. The primary material would go negative — this is flagged. "Create Split" stays disabled until everything balances. She can see exactly which rows are over-allocated.',
+								q: 'Angela enters 2,000 for Split 2 but total is only 3,200 with two other splits?',
+								a: 'Per-row status indicators turn amber immediately. The primary split would go negative — this is flagged. "Create Split" stays disabled until everything balances. She can see exactly which rows are over-allocated.',
 							},
 							{
-								q: 'She saves the split, then realizes Metal should be 900 not 800. Can she edit?',
-								a: 'Yes. She clicks the Metal child card, clicks the pencil icon at the group header, and edits the value. The parent\'s comparison table will show a yellow mismatch banner if the child sums no longer equal the original total.',
+								q: 'She saves the split, then realizes Split 2 should be 900 not 800. Can she edit?',
+								a: 'Yes. She clicks the Split 2 child card, clicks the pencil icon at the group header, and edits the value. The parent\'s comparison table will show a yellow mismatch banner if the child sums no longer equal the original total.',
 							},
 							{
 								q: 'What if she tries to split a card that\'s already been split?',
 								a: '"Split Measurement" is disabled for cards that already have the "Split" status. Same for child cards — you can\'t split a child.',
 							},
 							{
-								q: 'She adds a third material later. Can she re-split?',
-								a: 'She\'d undo the current split first (which restores the original), then split again with 3 materials. We cap at 4 materials per split.',
+								q: 'She adds a third structure later. Can she re-split?',
+								a: 'She\'d undo the current split first (which restores the original), then split again with 3 structures. We cap at 4 splits.',
 							},
 							{
 								q: 'A "Pending" card has no data yet. Can she split it?',
@@ -345,7 +344,7 @@ export default function LandingPage() {
 						</h2>
 						<p className="text-[14px] text-[#64748b] mt-2 leading-[1.65] max-w-xl">
 							No platform solves this at the measurement layer. They all force the roofer to figure out
-							&quot;which sq ft belongs to which material&quot; in their head — then manually enter it during estimating.
+							&quot;which sq ft belongs to which structure&quot; in their head — then manually enter it during estimating.
 						</p>
 					</motion.div>
 
@@ -423,11 +422,11 @@ export default function LandingPage() {
 							},
 							{
 								q: 'Token classification — are we categorizing all 76 tokens correctly?',
-								context: 'Currently: 37 splittable (divided from total), 6 independent/material-specific (waste factors — set per material), 33 fixed (gutters, siding, perimeter, facets — copied to all children). Roofers only see ~22 rows by default (zero-value tokens hidden). Need to validate: should Predominant Pitch and No of Roof Facets be independent instead of fixed?',
+								context: 'Currently: 37 splittable (divided from total), 6 independent/split-specific (waste factors — set per split), 33 fixed (gutters, siding, perimeter, facets — copied to all children). Roofers only see ~22 rows by default (zero-value tokens hidden). Need to validate: should Predominant Pitch and No of Roof Facets be independent instead of fixed?',
 							},
 							{
-								q: 'Should we support more than 4 materials?',
-								context: 'Capped at 4 for table readability. Real-world roofs rarely have more than 3 materials, but commercial jobs might.',
+								q: 'Should we support more than 4 splits?',
+								context: 'Capped at 4 for table readability. Real-world jobs rarely have more than 3 structures, but commercial jobs might.',
 							},
 						].map((item, i) => (
 							<div key={i} className="bg-[#faf5ff] rounded-xl border border-[#e9d5ff] p-5">
