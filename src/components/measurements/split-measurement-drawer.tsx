@@ -133,38 +133,35 @@ function CategoryGroup({
 
 						return (
 							<div key={token.key}
-								className={`grid items-center gap-x-3 px-5 py-[6px] border-b border-[#f1f5f9] last:border-b-0 transition-colors duration-100 ${isSkipped ? 'bg-[#f8fafc]/60' : 'hover:bg-[#fafbfc]'}`}
+								className={`group/row grid items-center gap-x-3 px-5 py-[6px] border-b border-[#f1f5f9] last:border-b-0 transition-colors duration-100 ${isSkipped ? 'bg-[#fafbfc]' : 'hover:bg-[#fafbfc]'}`}
 								style={{ gridTemplateColumns: colTemplate }}>
 								<span className="flex items-center gap-1.5 min-w-0">
-									<button type="button" onClick={() => onToggleSkip(token.key)}
-										className={`flex items-center justify-center size-[20px] rounded shrink-0 transition-all duration-150 cursor-pointer ${
-											isSkipped
-												? 'bg-[#f1f5f9] text-[#94a3b8] hover:bg-[#e2e8f0]'
-												: 'text-[#d4d4d8] hover:text-[#94a3b8] hover:bg-[#f1f5f9]'
-										}`}
-										title={isSkipped ? 'Resume splitting this token' : 'Skip — copy to all splits as-is'}>
-										{isSkipped ? (
-											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-												<rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-											</svg>
-										) : (
-											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-												<rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 9.9-1" />
-											</svg>
-										)}
-									</button>
 									<span className={`text-[12px] leading-snug truncate ${isSkipped ? 'text-[#94a3b8]' : 'text-[#334155]'}`} title={token.label}>
 										{token.label}
 									</span>
+									{isSkipped ? (
+										<button type="button" onClick={() => onToggleSkip(token.key)}
+											className="shrink-0 flex items-center justify-center size-[18px] rounded text-[#94a3b8] opacity-0 group-hover/row:opacity-100 transition-opacity duration-150 cursor-pointer hover:text-[#3b82f6] hover:bg-[#eff6ff]"
+											title="Undo skip">
+											<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+												<polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+											</svg>
+										</button>
+									) : (
+										<button type="button" onClick={() => onToggleSkip(token.key)}
+											className="shrink-0 text-[10px] font-medium text-[#94a3b8] opacity-0 group-hover/row:opacity-100 transition-opacity duration-150 cursor-pointer hover:text-[#64748b] hover:underline">
+											Skip
+										</button>
+									)}
 								</span>
-								<span className="text-[12px] text-[#94a3b8] text-right tabular-nums font-medium">
+								<span className={`text-[12px] text-right tabular-nums font-medium ${isSkipped ? 'text-[#cbd5e1]' : 'text-[#94a3b8]'}`}>
 									{parentVal.toLocaleString()}
 								</span>
 
 								{isSkipped ? (
 									splits.map((s) => (
 										<span key={s.id}
-											className="h-[30px] w-full rounded-md px-2 flex items-center justify-end text-[12px] font-medium select-none bg-[#f8fafc] text-[#cbd5e1]">
+											className="h-[30px] w-full rounded-md px-2 flex items-center justify-end text-[12px] font-medium select-none text-[#cbd5e1]">
 											—
 										</span>
 									))
