@@ -52,7 +52,7 @@ function SplitNameInput({
 				onBlur={commit}
 				onKeyDown={(e) => { if (e.key === 'Enter') { commit(); inputRef.current?.blur(); } if (e.key === 'Escape') { setDraft(value); inputRef.current?.blur(); } }}
 				maxLength={30}
-				className="h-[30px] w-[130px] rounded-md border border-[#e2e8f0] bg-white px-2 text-[12px] font-medium text-[#334155] outline-none transition-all duration-150 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/15 focus:shadow-sm hover:border-[#cbd5e1] placeholder:text-[#cbd5e1]"
+				className="h-[28px] w-[120px] bg-transparent px-1 text-[13px] font-medium text-[#334155] outline-none placeholder:text-[#cbd5e1]"
 				placeholder="Split name..."
 			/>
 		</div>
@@ -61,7 +61,7 @@ function SplitNameInput({
 
 /* ── Category group ── */
 function CategoryGroup({
-	category, splits, primaryId, values, searchQuery, hideZero, onManualChange, onAutoFix,
+	category, splits, primaryId, values, searchQuery, hideZero, skippedTokens, onManualChange, onAutoFix, onToggleSkip,
 }: {
 	category: TokenCategory;
 	splits: SplitDef[];
@@ -69,8 +69,10 @@ function CategoryGroup({
 	values: SplitValues;
 	searchQuery: string;
 	hideZero: boolean;
+	skippedTokens: Set<string>;
 	onManualChange: (splitId: string, tokenKey: string, val: number) => void;
 	onAutoFix: (tokenKey: string) => void;
+	onToggleSkip: (tokenKey: string) => void;
 }) {
 	const [isOpen, setIsOpen] = useState(true);
 	const parentValues = parentMeasurement.token_values;
@@ -116,72 +118,96 @@ function CategoryGroup({
 							<span key={s.id} className="flex items-center justify-end gap-1.5 pr-0.5">
 								<span className="size-[6px] rounded-full shrink-0" style={{ backgroundColor: s.color }} />
 								<span className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider truncate">{s.name}</span>
-							{s.id === primaryId && (
-								<svg width="10" height="10" viewBox="0 0 24 24" fill="#3b82f6" stroke="#3b82f6" strokeWidth="1.5" className="shrink-0">
-									<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-								</svg>
-							)}
 							</span>
 						))}
 					</div>
 
 					{filtered.map((token) => {
 						const parentVal = parentValues[token.key] ?? 0;
+						const isSkipped = skippedTokens.has(token.key);
 						const secondarySum = splits
 							.filter((s) => s.id !== primaryId)
 							.reduce((sum, s) => sum + (values[s.id]?.[token.key] ?? 0), 0);
 						const primaryVal = Math.round((parentVal - secondarySum) * 10) / 10;
-						const isOver = primaryVal < -0.01;
+						const isOver = !isSkipped && primaryVal < -0.01;
 
 						return (
 							<div key={token.key}
-								className="grid items-center gap-x-3 px-5 py-[6px] border-b border-[#f1f5f9] last:border-b-0 transition-colors duration-100 hover:bg-[#fafbfc]"
+								className={`grid items-center gap-x-3 px-5 py-[6px] border-b border-[#f1f5f9] last:border-b-0 transition-colors duration-100 ${isSkipped ? 'bg-[#f8fafc]/60' : 'hover:bg-[#fafbfc]'}`}
 								style={{ gridTemplateColumns: colTemplate }}>
-								<span className="text-[12px] text-[#334155] leading-snug truncate pr-1" title={token.label}>
-									{token.label}
+								<span className="flex items-center gap-1.5 min-w-0">
+									<button type="button" onClick={() => onToggleSkip(token.key)}
+										className={`flex items-center justify-center size-[20px] rounded shrink-0 transition-all duration-150 cursor-pointer ${
+											isSkipped
+												? 'bg-[#f1f5f9] text-[#94a3b8] hover:bg-[#e2e8f0]'
+												: 'text-[#d4d4d8] hover:text-[#94a3b8] hover:bg-[#f1f5f9]'
+										}`}
+										title={isSkipped ? 'Resume splitting this token' : 'Skip — copy to all splits as-is'}>
+										{isSkipped ? (
+											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+												<rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+											</svg>
+										) : (
+											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+												<rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 9.9-1" />
+											</svg>
+										)}
+									</button>
+									<span className={`text-[12px] leading-snug truncate ${isSkipped ? 'text-[#94a3b8]' : 'text-[#334155]'}`} title={token.label}>
+										{token.label}
+									</span>
 								</span>
 								<span className="text-[12px] text-[#94a3b8] text-right tabular-nums font-medium">
 									{parentVal.toLocaleString()}
 								</span>
 
-								{splits.map((s) => {
-									if (s.id === primaryId) {
-										return (
-											<span key={s.id}
-												className={`h-[30px] w-full rounded-md px-2 flex items-center justify-end gap-1.5 text-[12px] tabular-nums font-medium select-none transition-colors duration-150 ${
-													isOver ? 'bg-[#fef2f2] text-[#ef4444]' : 'bg-[#f8fafc] text-[#475569]'
-												}`}>
-												{primaryVal.toLocaleString()}
-												{isOver && (
-													<button type="button" onClick={() => onAutoFix(token.key)}
-														className="text-[9px] font-bold text-[#ef4444] cursor-pointer rounded px-1 py-0.5 hover:bg-[#fee2e2] hover:underline decoration-[#ef4444]/40 shrink-0"
-														title="Auto-fix over-allocation">
-														fix
-													</button>
-												)}
-											</span>
-										);
-									}
+								{isSkipped ? (
+									splits.map((s) => (
+										<span key={s.id}
+											className="h-[30px] w-full rounded-md px-2 flex items-center justify-end text-[12px] font-medium select-none bg-[#f8fafc] text-[#cbd5e1]">
+											—
+										</span>
+									))
+								) : (
+									splits.map((s) => {
+										if (s.id === primaryId) {
+											return (
+												<span key={s.id}
+													className={`h-[30px] w-full rounded-md px-2 flex items-center justify-end gap-1.5 text-[12px] tabular-nums font-medium select-none transition-colors duration-150 ${
+														isOver ? 'bg-[#fef2f2] text-[#ef4444]' : 'bg-[#f8fafc] text-[#475569]'
+													}`}>
+													{primaryVal.toLocaleString()}
+													{isOver && (
+														<button type="button" onClick={() => onAutoFix(token.key)}
+															className="text-[9px] font-bold text-[#ef4444] cursor-pointer rounded px-1 py-0.5 hover:bg-[#fee2e2] hover:underline decoration-[#ef4444]/40 shrink-0"
+															title="Auto-fix over-allocation">
+															fix
+														</button>
+													)}
+												</span>
+											);
+										}
 
-									const val = values[s.id]?.[token.key] ?? 0;
-									return (
-										<input
-											key={s.id}
-											type="number" step="any" min={0}
-											value={val || ''}
-											onChange={(e) => {
-												const raw = e.target.value;
-												onManualChange(s.id, token.key, raw === '' ? 0 : (parseFloat(raw) || 0));
-											}}
-											placeholder="0"
-											className={`h-[30px] w-full rounded-md border bg-white px-2 text-[12px] text-right tabular-nums outline-none transition-all duration-150 ${
-												isOver
-													? 'border-[#fca5a5] text-[#ef4444] focus:border-[#ef4444] focus:ring-2 focus:ring-[#fca5a5]/30'
-													: 'border-[#e2e8f0] text-[#334155] hover:border-[#cbd5e1] focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/15'
-											}`}
-										/>
-									);
-								})}
+										const val = values[s.id]?.[token.key] ?? 0;
+										return (
+											<input
+												key={s.id}
+												type="number" step="any" min={0}
+												value={val || ''}
+												onChange={(e) => {
+													const raw = e.target.value;
+													onManualChange(s.id, token.key, raw === '' ? 0 : (parseFloat(raw) || 0));
+												}}
+												placeholder="0"
+												className={`h-[30px] w-full rounded-md border bg-white px-2 text-[12px] text-right tabular-nums outline-none transition-all duration-150 ${
+													isOver
+														? 'border-[#fca5a5] text-[#ef4444] focus:border-[#ef4444] focus:ring-2 focus:ring-[#fca5a5]/30'
+														: 'border-[#e2e8f0] text-[#334155] hover:border-[#cbd5e1] focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/15'
+												}`}
+											/>
+										);
+									})
+								)}
 
 							</div>
 						);
@@ -296,6 +322,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 	const [primaryId, setPrimaryId] = useState('split-1');
 	const [values, setValues] = useState<SplitValues>({});
 	const [independentValues, setIndependentValues] = useState<SplitValues>({});
+	const [skippedTokens, setSkippedTokens] = useState<Set<string>>(new Set());
 	const [searchQuery, setSearchQuery] = useState('');
 	const [hideZeroValues, setHideZeroValues] = useState(true);
 	const [error, setError] = useState('');
@@ -309,6 +336,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 			setPrimaryId('split-1');
 			setValues({});
 			setIndependentValues({});
+			setSkippedTokens(new Set());
 			setSearchQuery('');
 			setHideZeroValues(true);
 			setError('');
@@ -352,6 +380,15 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		)));
 	}, []);
 
+	const toggleSkip = useCallback((tokenKey: string) => {
+		setSkippedTokens((prev) => {
+			const next = new Set(prev);
+			if (next.has(tokenKey)) next.delete(tokenKey);
+			else next.add(tokenKey);
+			return next;
+		});
+	}, []);
+
 	const splittableTokens = useMemo(() => TOKEN_DEFINITIONS.filter(t => t.classification === 'splittable'), []);
 
 	const handleManualChange = useCallback((splitId: string, tokenKey: string, val: number) => {
@@ -360,28 +397,6 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 			[splitId]: { ...(prev[splitId] ?? {}), [tokenKey]: val },
 		}));
 	}, []);
-
-	const swapPrimary = useCallback((newPrimaryId: string) => {
-		if (newPrimaryId === primaryId) return;
-		const parentVals = parentMeasurement.token_values;
-		const oldPrimaryId = primaryId;
-		const secondaries = splits.filter((s) => s.id !== oldPrimaryId);
-
-		setValues((prev) => {
-			const next = { ...prev };
-			const oldPrimaryVals: Record<string, number> = {};
-			splittableTokens.forEach((token) => {
-				const parentVal = parentVals[token.key] ?? 0;
-				const secSum = secondaries.reduce((sum, s) => sum + (prev[s.id]?.[token.key] ?? 0), 0);
-				oldPrimaryVals[token.key] = Math.max(0, Math.round((parentVal - secSum) * 10) / 10);
-			});
-			next[oldPrimaryId] = oldPrimaryVals;
-			delete next[newPrimaryId];
-			return next;
-		});
-
-		setPrimaryId(newPrimaryId);
-	}, [primaryId, splits, splittableTokens]);
 
 	const handleAutoFix = useCallback((tokenKey: string) => {
 		const parentVal = parentMeasurement.token_values[tokenKey] ?? 0;
@@ -412,13 +427,14 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		const parentVals = parentMeasurement.token_values;
 		const secondaries = splits.filter((s) => s.id !== primaryId);
 		splittableTokens.forEach((token) => {
+			if (skippedTokens.has(token.key)) return;
 			const parentVal = parentVals[token.key] ?? 0;
 			if (parentVal === 0) return;
 			const secSum = secondaries.reduce((sum, s) => sum + (values[s.id]?.[token.key] ?? 0), 0);
 			if (secSum > parentVal + 0.01) overCount++;
 		});
 		return { overCount };
-	}, [splits, primaryId, values, splittableTokens]);
+	}, [splits, primaryId, values, splittableTokens, skippedTokens]);
 
 	const handleIndependentChange = useCallback((splitId: string, tokenKey: string, val: number) => {
 		setIndependentValues((prev) => ({
@@ -446,6 +462,10 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 			const allocations: Record<string, number> = {};
 			splittableTokens.forEach((token) => {
 				const parentVal = parentValues[token.key] ?? 0;
+				if (skippedTokens.has(token.key)) {
+					allocations[token.key] = parentVal;
+					return;
+				}
 				if (split.id === primaryId) {
 					const secSum = secondaries.reduce(
 						(sum, s) => sum + (values[s.id]?.[token.key] ?? 0), 0
@@ -471,7 +491,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		});
 		onGenerate(generateChildCards(parentMeasurement, finalScopes));
 		onClose();
-	}, [hasDuplicateNames, splits, primaryId, values, independentValues, splittableTokens, independentTokens, fixedTokens, onGenerate, onClose]);
+	}, [hasDuplicateNames, splits, primaryId, values, independentValues, skippedTokens, splittableTokens, independentTokens, fixedTokens, onGenerate, onClose]);
 
 	if (!isOpen) return null;
 
@@ -489,7 +509,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 						<div>
 							<h2 className="text-[17px] font-semibold text-[#0f172a] tracking-tight">Split Measurement</h2>
 							<p className="text-[12px] text-[#64748b] mt-0.5 leading-relaxed">
-								Enter secondary values — the <span className="font-medium text-[#475569]">primary auto-adjusts</span>.
+								Enter values for each split — <span className="font-medium text-[#475569]">Split 1 auto-adjusts</span> as the remainder.
 							</p>
 						</div>
 						<button type="button" onClick={onClose}
@@ -505,54 +525,24 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 				{/* Split chips */}
 				<div className="shrink-0 border-b border-[#e5e7eb] px-6 py-3.5 bg-[#fafbfc]">
 					<div className="flex items-center gap-2.5 flex-wrap">
-						{splits.map((s) => {
-							const isPrimary = s.id === primaryId;
-							return (
-								<div key={s.id}
-									className={`flex items-center gap-0.5 rounded-lg border bg-white pl-1 pr-1 py-1 transition-all duration-150 ${
-										isPrimary ? 'border-[#3b82f6]/30 ring-1 ring-[#3b82f6]/10' : 'border-[#e5e7eb] hover:border-[#cbd5e1] hover:shadow-sm'
-									}`}>
-									<SplitNameInput
-										value={s.name} color={s.color}
-										onChange={(n) => setSplitName(s.id, n)}
-									/>
-								{isPrimary ? (
-									<span className="relative group flex items-center justify-center size-[28px] rounded-md mr-0.5 select-none cursor-default">
-										<svg width="14" height="14" viewBox="0 0 24 24" fill="#3b82f6" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-											<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+						{splits.map((s) => (
+							<div key={s.id}
+								className="flex items-center gap-0.5 rounded-lg border border-[#e2e8f0] bg-white pl-2.5 pr-1 py-1 transition-all duration-150 hover:border-[#cbd5e1] hover:shadow-sm focus-within:border-[#3b82f6] focus-within:ring-2 focus-within:ring-[#3b82f6]/15">
+								<SplitNameInput
+									value={s.name} color={s.color}
+									onChange={(n) => setSplitName(s.id, n)}
+								/>
+								{splits.length > 2 && (
+									<button type="button" onClick={() => removeSplit(s.id)}
+										className="flex items-center justify-center size-[28px] rounded-md text-[#d4d4d8] transition-all duration-150 hover:bg-[#fef2f2] hover:text-[#ef4444]"
+										aria-label={`Remove ${s.name}`}>
+										<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+											<path d="M18 6L6 18" /><path d="M6 6l12 12" />
 										</svg>
-										<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded-md bg-[#0f172a] text-[10px] font-medium text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-lg">
-											Primary split
-											<span className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-[#0f172a]" />
-										</span>
-									</span>
-								) : (
-									<>
-										<button type="button" onClick={() => swapPrimary(s.id)}
-											className="relative group flex items-center justify-center size-[28px] rounded-md text-[#d4d4d8] transition-all duration-150 hover:text-[#3b82f6] hover:bg-[#eff6ff]"
-											aria-label={`Set ${s.name} as primary`}>
-											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-												<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-											</svg>
-											<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded-md bg-[#0f172a] text-[10px] font-medium text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-lg">
-												Set as primary
-												<span className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-[#0f172a]" />
-											</span>
-										</button>
-											{splits.length > 2 && (
-												<button type="button" onClick={() => removeSplit(s.id)}
-													className="flex items-center justify-center size-[28px] rounded-md text-[#d4d4d8] transition-all duration-150 hover:bg-[#fef2f2] hover:text-[#ef4444]"
-													aria-label={`Remove ${s.name}`}>
-													<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-														<path d="M18 6L6 18" /><path d="M6 6l12 12" />
-													</svg>
-												</button>
-											)}
-										</>
-									)}
-								</div>
-							);
-						})}
+									</button>
+								)}
+							</div>
+						))}
 						{splits.length < 4 && (
 							<button type="button" onClick={addSplit}
 								className="flex items-center gap-1.5 rounded-lg border border-dashed border-[#cbd5e1] px-3 py-[7px] text-[12px] font-medium text-[#94a3b8] transition-all duration-150 hover:border-[#3b82f6] hover:text-[#3b82f6] hover:bg-[#eff6ff]">
@@ -610,8 +600,10 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 							key={cat} category={cat}
 							splits={splits} primaryId={primaryId} values={values}
 							searchQuery={searchQuery} hideZero={hideZeroValues}
+							skippedTokens={skippedTokens}
 							onManualChange={handleManualChange}
 							onAutoFix={handleAutoFix}
+							onToggleSkip={toggleSkip}
 						/>
 					))}
 
@@ -644,13 +636,13 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 								</span>
 							) : !hasAnyValues ? (
 								<span className="text-[11px] text-[#94a3b8]">
-									Enter values for secondary splits
+									Enter values — Split 1 adjusts automatically
 								</span>
 							) : null}
 						</div>
 						<div className="flex items-center gap-2.5">
 							{hasAnyValues && (
-								<button type="button" onClick={() => { setValues({}); setIndependentValues({}); }}
+								<button type="button" onClick={() => { setValues({}); setIndependentValues({}); setSkippedTokens(new Set()); }}
 									className="h-[36px] rounded-md px-3.5 text-[12px] font-medium text-[#94a3b8] transition-all duration-150 hover:text-[#ef4444] hover:bg-[#fef2f2] active:scale-[0.98]"
 									title="Reset all values">
 									Reset

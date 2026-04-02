@@ -172,8 +172,7 @@ function PrimarySplitAnimation() {
 					<div className="flex-1 px-3 py-2 bg-[#f8fafc] text-[9px] font-semibold text-[#64748b] uppercase tracking-wider border-b border-[#e2e8f0]">Token</div>
 					<div className="w-[72px] px-2 py-2 bg-[#f8fafc] text-[9px] font-semibold text-[#64748b] uppercase tracking-wider text-center border-b border-[#e2e8f0]">Total</div>
 					<div className="w-[72px] px-2 py-2 bg-[#eef2ff] text-[9px] font-semibold text-[#4F46E5] uppercase tracking-wider text-center flex items-center justify-center gap-1 border-b border-[#c7d2fe]">
-						<svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d={SPARKLE_PATH} fill="#4F46E5" /></svg>
-						Primary
+						Split 1
 					</div>
 					<div className="w-[72px] px-2 py-2 bg-[#fff7ed] text-[9px] font-semibold text-[#E18026] uppercase tracking-wider text-center border-b border-[#fed7aa]">Split 2</div>
 				</motion.div>
@@ -293,15 +292,6 @@ function ConnectedCardsAnimation() {
 							<div className="absolute top-0 left-0 w-full h-[2px] bg-[#4F46E5]" />
 							<span className="text-[8px] text-[#64748b] uppercase font-semibold mt-0.5">Split 1</span>
 							<span className="text-[13px] font-bold text-[#0f172a] tabular-nums">13.55 SQ</span>
-							<motion.div
-								className="flex items-center gap-0.5"
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ delay: 2.0 }}
-							>
-								<div className="size-1 rounded-full bg-[#22c55e]" />
-								<span className="text-[7px] text-[#16a34a] font-medium">Primary</span>
-							</motion.div>
 						</div>
 					</motion.div>
 
@@ -315,15 +305,6 @@ function ConnectedCardsAnimation() {
 							<div className="absolute top-0 left-0 w-full h-[2px] bg-[#E18026]" />
 							<span className="text-[8px] text-[#64748b] uppercase font-semibold mt-0.5">Split 2</span>
 							<span className="text-[13px] font-bold text-[#0f172a] tabular-nums">8.42 SQ</span>
-							<motion.div
-								className="flex items-center gap-0.5"
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ delay: 2.2 }}
-							>
-								<div className="size-1 rounded-full bg-[#94a3b8]" />
-								<span className="text-[7px] text-[#94a3b8] font-medium">Secondary</span>
-							</motion.div>
 						</div>
 					</motion.div>
 				</div>
@@ -362,11 +343,11 @@ const STEPS = [
 		illustration: SplitCardAnimation,
 	},
 	{
-		id: 'primary',
+		id: 'auto-remainder',
 		badge: 'Smart Workflow',
-		title: 'Primary Split',
+		title: 'Auto Remainder',
 		subtitle: 'Enter less, calculate more',
-		description: 'Tag one split as primary. Enter values only for secondary splits — the primary auto-calculates everything else. No manual math needed.',
+		description: 'Enter values for your splits — the first split auto-calculates the remainder. No manual math needed.',
 		illustration: PrimarySplitAnimation,
 	},
 	{

@@ -165,13 +165,13 @@ export default function LandingPage() {
 								<div className="w-px flex-1 bg-[#e2e8f0] mt-2" />
 							</div>
 							<div className="pb-10 flex-1 min-w-0">
-								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Sets Split 1 as &quot;Primary&quot;</h3>
+								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Split 1 auto-adjusts as the remainder</h3>
 								<p className="text-[14px] text-[#64748b] leading-[1.65] mb-3">
-									This is the key interaction. She tags the main split as <strong>Primary</strong>. This means:
+									This is the key interaction. The first split always auto-calculates:
 								</p>
 								<div className="bg-[#fffbeb] border border-[#fde68a] rounded-lg px-4 py-3 text-[13px] text-[#92400e] leading-[1.65]">
-									The primary split&apos;s values are <strong>auto-calculated</strong> — always <code className="bg-[#fef3c7] px-1 rounded text-[12px]">Total − Σ(all other splits)</code>.
-									Angela only types values for the smaller/secondary splits. The primary absorbs the remainder.
+									Split 1&apos;s values are <strong>auto-calculated</strong> — always <code className="bg-[#fef3c7] px-1 rounded text-[12px]">Total − Σ(all other splits)</code>.
+									Angela only types values for the other splits. Split 1 absorbs the remainder.
 								</div>
 							</div>
 						</motion.div>
@@ -190,7 +190,7 @@ export default function LandingPage() {
 								</p>
 								<p className="text-[14px] text-[#64748b] leading-[1.65] mt-2">
 									She types <strong>600</strong> for Split 2&apos;s total roof area (in squares). Instantly, Split 1 auto-calculates to <strong>~16</strong> (21.97 − 6).
-									She fills in ridge length, eave length, pitch areas for Split 2. Each time, the Primary column auto-adjusts.
+									She fills in ridge length, eave length, pitch areas for Split 2. Each time, Split 1 auto-adjusts.
 								</p>
 								<p className="text-[14px] text-[#64748b] leading-[1.65] mt-2">
 									Every row shows a status: <span className="text-[#16a34a] font-medium">✓</span> when balanced, <span className="text-[#d97706] font-medium">⚠</span> if over-allocated.
@@ -304,7 +304,7 @@ export default function LandingPage() {
 						{[
 							{
 								q: 'Angela enters 2,000 for Split 2 but total is only 3,200 with two other splits?',
-								a: 'Per-row status indicators turn amber immediately. The primary split would go negative — this is flagged. "Create Split" stays disabled until everything balances. She can see exactly which rows are over-allocated.',
+								a: 'Per-row status indicators turn amber immediately. Split 1 would go negative — this is flagged. "Create Split" stays disabled until everything balances. She can see exactly which rows are over-allocated.',
 							},
 							{
 								q: 'She saves the split, then realizes Split 2 should be 900 not 800. Can she edit?',
