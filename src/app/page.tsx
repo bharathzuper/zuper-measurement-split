@@ -29,17 +29,6 @@ function StepNumber({ n, color = '#3b82f6' }: { n: number; color?: string }) {
 	);
 }
 
-function Arrow() {
-	return (
-		<div className="flex flex-col items-center py-1">
-			<div className="w-px h-5 bg-[#cbd5e1]" />
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-				<path d="M12 5v14M5 12l7 7 7-7" />
-			</svg>
-		</div>
-	);
-}
-
 export default function LandingPage() {
 	return (
 		<div className="min-h-screen bg-[#FAFBFC]">
@@ -165,13 +154,15 @@ export default function LandingPage() {
 								<div className="w-px flex-1 bg-[#e2e8f0] mt-2" />
 							</div>
 							<div className="pb-10 flex-1 min-w-0">
-								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Split 1 auto-adjusts as the remainder</h3>
+								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Split 1 pre-fills the remainder — nothing is locked</h3>
 								<p className="text-[14px] text-[#64748b] leading-[1.65] mb-3">
-									This is the key interaction. The first split always auto-calculates:
+									This is the key interaction. The first split pre-fills <code className="bg-[#f1f5f9] px-1 rounded text-[12px]">Report − Σ(other splits)</code> as
+									she types, so the fast path needs no math. But it stays a normal, editable field — the moment she types into it, her number wins.
 								</p>
 								<div className="bg-[#fffbeb] border border-[#fde68a] rounded-lg px-4 py-3 text-[13px] text-[#92400e] leading-[1.65]">
-									Split 1&apos;s values are <strong>auto-calculated</strong> — always <code className="bg-[#fef3c7] px-1 rounded text-[12px]">Total − Σ(all other splits)</code>.
-									Angela only types values for the other splits. Split 1 absorbs the remainder.
+									Aerial reports (GAF, EagleView) often differ from what crews find on site. So splits
+									<strong> don&apos;t have to add up to the report</strong> — any difference shows as an amber <strong>Diff chip</strong> on
+									the row, purely informational. Site values are kept as entered.
 								</div>
 							</div>
 						</motion.div>
@@ -189,11 +180,12 @@ export default function LandingPage() {
 									She can toggle <strong>&quot;Show all&quot;</strong> if needed.
 								</p>
 								<p className="text-[14px] text-[#64748b] leading-[1.65] mt-2">
-									She types <strong>600</strong> for Split 2&apos;s total roof area (in squares). Instantly, Split 1 auto-calculates to <strong>~16</strong> (21.97 − 6).
-									She fills in ridge length, eave length, pitch areas for Split 2. Each time, Split 1 auto-adjusts.
+									She types <strong>6</strong> for Split 2&apos;s total roof area (in squares). Instantly, Split 1 pre-fills to <strong>~16</strong> (21.97 − 6).
+									She fills in ridge length, eave length, pitch areas for Split 2. Each pre-fill keeps adjusting — until she types over it.
 								</p>
 								<p className="text-[14px] text-[#64748b] leading-[1.65] mt-2">
-									Every row shows a status: <span className="text-[#16a34a] font-medium">✓</span> when balanced, <span className="text-[#d97706] font-medium">⚠</span> if over-allocated.
+									On site the crew measured 25 squares, not 21.97 — so she types <strong>19</strong> into Split 1 directly. The row shows an amber
+									<span className="text-[#d97706] font-medium"> Diff +3.03</span> chip: informational, never blocking. A hover reset (↺) restores the report&apos;s numbers if it was a typo.
 								</p>
 
 								<div className="mt-4 bg-white border border-[#e2e8f0] rounded-lg overflow-hidden">
@@ -232,7 +224,7 @@ export default function LandingPage() {
 							<div className="flex-1 min-w-0">
 								<h3 className="text-[15px] font-bold text-[#0f172a] mb-1">Saves → child cards appear</h3>
 								<p className="text-[14px] text-[#64748b] leading-[1.65]">
-									She clicks <strong>Create Split</strong> (only enabled when all values balance).
+									She clicks <strong>Create Split</strong> (enabled as long as split names are unique — values never block).
 									The drawer closes. The original card locks with a &quot;Split · 2&quot; badge.
 									Two new child cards appear grouped next to it in the carousel — one per split.
 									A toast confirms: &quot;Split into 2 parts.&quot;
@@ -304,7 +296,7 @@ export default function LandingPage() {
 						{[
 							{
 								q: 'Angela enters 2,000 for Split 2 but total is only 3,200 with two other splits?',
-								a: 'Per-row status indicators turn amber immediately. Split 1 would go negative — this is flagged. "Create Split" stays disabled until everything balances. She can see exactly which rows are over-allocated.',
+								a: 'Nothing blocks. Split 1\'s pre-fill floors at 0 and the row shows an amber Diff chip with the overage. If the site genuinely has more material than the report, she keeps her numbers — if it was a typo, the hover reset (↺) restores the report\'s values for that row.',
 							},
 							{
 								q: 'She saves the split, then realizes Split 2 should be 900 not 800. Can she edit?',
