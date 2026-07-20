@@ -345,9 +345,9 @@ const STEPS = [
 	{
 		id: 'auto-remainder',
 		badge: 'Smart Workflow',
-		title: 'Auto Remainder',
-		subtitle: 'Enter less, calculate more',
-		description: 'Enter values for your splits — the first split auto-calculates the remainder. No manual math needed.',
+		title: 'Pre-filled, Never Locked',
+		subtitle: 'Edit any value — site reality wins',
+		description: 'Split 1 pre-fills the remainder as you type, but every value stays editable. Totals can differ from the report — differences are flagged, never blocked.',
 		illustration: PrimarySplitAnimation,
 	},
 	{
