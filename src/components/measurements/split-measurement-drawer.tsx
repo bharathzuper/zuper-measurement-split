@@ -23,6 +23,46 @@ interface SplitDef {
 
 type SplitValues = Record<string, Record<string, number>>;
 
+const round2 = (n: number) => Math.round(n * 100) / 100;
+const fmtNum = (n: number) =>
+	round2(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
+
+/*
+ * Cell model — "pre-fill, don't lock":
+ * The first split pre-fills with the remainder (report − other splits) until the
+ * user edits it for that token. After that it's a manual value like any other.
+ * Splits never have to add up to the report — the Δ column surfaces the difference.
+ */
+function getCellValue(
+	splits: SplitDef[],
+	values: SplitValues,
+	tokenKey: string,
+	parentVal: number,
+	splitId: string,
+): { value: number; isAuto: boolean } {
+	const manual = values[splitId]?.[tokenKey];
+	if (splitId === splits[0]?.id && manual === undefined) {
+		const othersSum = splits
+			.slice(1)
+			.reduce((sum, s) => sum + (values[s.id]?.[tokenKey] ?? 0), 0);
+		return { value: Math.max(0, round2(parentVal - othersSum)), isAuto: true };
+	}
+	return { value: manual ?? 0, isAuto: false };
+}
+
+function getRowVariance(
+	splits: SplitDef[],
+	values: SplitValues,
+	tokenKey: string,
+	parentVal: number,
+): number {
+	const sum = splits.reduce(
+		(acc, s) => acc + getCellValue(splits, values, tokenKey, parentVal, s.id).value,
+		0,
+	);
+	return round2(sum - parentVal);
+}
+
 /* ── Inline split name input ── */
 function SplitNameInput({
 	value, color, onChange,
@@ -59,19 +99,32 @@ function SplitNameInput({
 	);
 }
 
+/* ── Variance chip (Δ vs report) ── */
+function VarianceChip({ variance, rowSum, parentVal }: { variance: number; rowSum: number; parentVal: number }) {
+	if (Math.abs(variance) < 0.005) return null;
+	return (
+		<span
+			role="status"
+			aria-label={`Splits total ${fmtNum(rowSum)}, report says ${fmtNum(parentVal)} — ${variance > 0 ? 'over' : 'under'} by ${fmtNum(Math.abs(variance))}`}
+			title={`Splits total ${fmtNum(rowSum)} — report says ${fmtNum(parentVal)}. Site values are kept as entered.`}
+			className="inline-flex items-center rounded border border-[#fde68a] bg-[#fffbeb] px-1 py-0.5 text-[10px] font-semibold tabular-nums text-[#b45309] cursor-default select-none">
+			{variance > 0 ? `+${fmtNum(variance)}` : fmtNum(variance)}
+		</span>
+	);
+}
+
 /* ── Category group ── */
 function CategoryGroup({
-	category, splits, primaryId, values, searchQuery, hideZero, skippedTokens, onManualChange, onAutoFix, onToggleSkip,
+	category, splits, values, searchQuery, hideZero, skippedTokens, onManualChange, onResetRow, onToggleSkip,
 }: {
 	category: TokenCategory;
 	splits: SplitDef[];
-	primaryId: string;
 	values: SplitValues;
 	searchQuery: string;
 	hideZero: boolean;
 	skippedTokens: Set<string>;
 	onManualChange: (splitId: string, tokenKey: string, val: number) => void;
-	onAutoFix: (tokenKey: string) => void;
+	onResetRow: (tokenKey: string) => void;
 	onToggleSkip: (tokenKey: string) => void;
 }) {
 	const [isOpen, setIsOpen] = useState(true);
@@ -92,7 +145,7 @@ function CategoryGroup({
 	if (filtered.length === 0) return null;
 
 	const splitCols = splits.map(() => 'minmax(80px, 1fr)').join(' ');
-	const colTemplate = `minmax(120px, 1.4fr) 60px ${splitCols}`;
+	const colTemplate = `minmax(120px, 1.4fr) 60px ${splitCols} 64px`;
 
 	return (
 		<div className="border-b border-[#e5e7eb] last:border-b-0">
@@ -113,23 +166,27 @@ function CategoryGroup({
 					<div className="grid items-center gap-x-3 px-5 py-1.5 bg-[#f8fafc] border-y border-[#e5e7eb]"
 						style={{ gridTemplateColumns: colTemplate }}>
 						<span className="text-[10px] font-semibold text-[#94a3b8] uppercase tracking-widest">Measurement</span>
-						<span className="text-[10px] font-semibold text-[#94a3b8] uppercase tracking-widest text-right">Total</span>
-						{splits.map((s) => (
-							<span key={s.id} className="flex items-center justify-end gap-1.5 pr-0.5">
+						<span className="text-[10px] font-semibold text-[#94a3b8] uppercase tracking-widest text-right">Report</span>
+						{splits.map((s, idx) => (
+							<span key={s.id} className="flex items-center justify-end gap-1.5 pr-0.5"
+								title={idx === 0 ? 'Pre-fills the remainder until you edit it' : undefined}>
 								<span className="size-[6px] rounded-full shrink-0" style={{ backgroundColor: s.color }} />
 								<span className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider truncate">{s.name}</span>
 							</span>
 						))}
+						<span
+							className="text-[10px] font-semibold text-[#94a3b8] uppercase tracking-widest text-right cursor-default"
+							title="Difference between split totals and the report — informational, never blocking">
+							Diff
+						</span>
 					</div>
 
 					{filtered.map((token) => {
 						const parentVal = parentValues[token.key] ?? 0;
 						const isSkipped = skippedTokens.has(token.key);
-						const secondarySum = splits
-							.filter((s) => s.id !== primaryId)
-							.reduce((sum, s) => sum + (values[s.id]?.[token.key] ?? 0), 0);
-						const primaryVal = Math.round((parentVal - secondarySum) * 10) / 10;
-						const isOver = !isSkipped && primaryVal < -0.01;
+						const variance = isSkipped ? 0 : getRowVariance(splits, values, token.key, parentVal);
+						const rowSum = round2(parentVal + variance);
+						const isRowDirty = splits.some((s) => values[s.id]?.[token.key] !== undefined);
 
 						return (
 							<div key={token.key}
@@ -167,44 +224,41 @@ function CategoryGroup({
 									))
 								) : (
 									splits.map((s) => {
-										if (s.id === primaryId) {
-											return (
-												<span key={s.id}
-													className={`h-[30px] w-full rounded-md px-2 flex items-center justify-end gap-1.5 text-[12px] tabular-nums font-medium select-none transition-colors duration-150 ${
-														isOver ? 'bg-[#fef2f2] text-[#ef4444]' : 'bg-[#f8fafc] text-[#475569]'
-													}`}>
-													{primaryVal.toLocaleString()}
-													{isOver && (
-														<button type="button" onClick={() => onAutoFix(token.key)}
-															className="text-[9px] font-bold text-[#ef4444] cursor-pointer rounded px-1 py-0.5 hover:bg-[#fee2e2] hover:underline decoration-[#ef4444]/40 shrink-0"
-															title="Auto-fix over-allocation">
-															fix
-														</button>
-													)}
-												</span>
-											);
-										}
-
-										const val = values[s.id]?.[token.key] ?? 0;
+										const cell = getCellValue(splits, values, token.key, parentVal, s.id);
 										return (
 											<input
 												key={s.id}
 												type="number" step="any" min={0}
-												value={val || ''}
+												value={cell.isAuto ? cell.value : (cell.value || '')}
 												onChange={(e) => {
 													const raw = e.target.value;
 													onManualChange(s.id, token.key, raw === '' ? 0 : (parseFloat(raw) || 0));
 												}}
 												placeholder="0"
-												className={`h-[30px] w-full rounded-md border bg-white px-2 text-[12px] text-right tabular-nums outline-none transition-all duration-150 ${
-													isOver
-														? 'border-[#fca5a5] text-[#ef4444] focus:border-[#ef4444] focus:ring-2 focus:ring-[#fca5a5]/30'
-														: 'border-[#e2e8f0] text-[#334155] hover:border-[#cbd5e1] focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/15'
+												aria-label={`${s.name} — ${token.label}${cell.isAuto ? ' (pre-filled with the remainder)' : ''}`}
+												title={cell.isAuto ? 'Pre-filled with the remainder — type to override' : undefined}
+												className={`h-[30px] w-full rounded-md border px-2 text-[12px] text-right tabular-nums outline-none transition-all duration-150 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/15 ${
+													cell.isAuto
+														? 'border-transparent bg-[#f8fafc] font-medium text-[#64748b] hover:border-[#cbd5e1] focus:bg-white focus:text-[#334155]'
+														: 'border-[#e2e8f0] bg-white text-[#334155] hover:border-[#cbd5e1]'
 												}`}
 											/>
 										);
 									})
 								)}
+
+								<span className="flex items-center justify-end gap-1">
+									{!isSkipped && isRowDirty && (
+										<button type="button" onClick={() => onResetRow(token.key)}
+											className="flex items-center justify-center size-[18px] rounded text-[#94a3b8] opacity-0 group-hover/row:opacity-100 transition-opacity duration-150 cursor-pointer hover:text-[#3b82f6] hover:bg-[#eff6ff]"
+											title="Reset row to report values">
+											<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+												<polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+											</svg>
+										</button>
+									)}
+									{!isSkipped && <VarianceChip variance={variance} rowSum={rowSum} parentVal={parentVal} />}
+								</span>
 
 							</div>
 						);
@@ -243,7 +297,7 @@ function SplitSpecificSection({
 	if (filtered.length === 0) return null;
 
 	const splitCols = splits.map(() => 'minmax(80px, 1fr)').join(' ');
-	const colTemplate = `minmax(120px, 1.4fr) 60px ${splitCols}`;
+	const colTemplate = `minmax(120px, 1.4fr) 60px ${splitCols} 64px`;
 
 	return (
 		<div className="border-b border-[#e5e7eb] last:border-b-0">
@@ -272,6 +326,7 @@ function SplitSpecificSection({
 								<span className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider truncate">{s.name}</span>
 							</span>
 						))}
+						<span aria-hidden />
 					</div>
 
 					{filtered.map((token) => (
@@ -296,10 +351,12 @@ function SplitSpecificSection({
 											onIndependentChange(s.id, token.key, raw === '' ? 0 : (parseFloat(raw) || 0));
 										}}
 										placeholder="0"
+										aria-label={`${s.name} — ${token.label}`}
 										className="h-[30px] w-full rounded-md border border-[#e2e8f0] bg-white px-2 text-[12px] text-right tabular-nums outline-none transition-all duration-150 text-[#334155] hover:border-[#cbd5e1] focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/15"
 									/>
 								);
 							})}
+							<span aria-hidden />
 						</div>
 					))}
 				</div>
@@ -308,15 +365,14 @@ function SplitSpecificSection({
 	);
 }
 
+const SPLIT_COLORS = ['#4F46E5', '#E18026', '#0891B2', '#28A138'];
+
 /* ── Main drawer ── */
 export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMeasurementDrawerProps) {
-	const SPLIT_COLORS = ['#4F46E5', '#E18026', '#0891B2', '#28A138'];
-
 	const [splits, setSplits] = useState<SplitDef[]>([
 		{ id: 'split-1', name: 'Split 1', color: SPLIT_COLORS[0] },
 		{ id: 'split-2', name: 'Split 2', color: SPLIT_COLORS[1] },
 	]);
-	const [primaryId, setPrimaryId] = useState('split-1');
 	const [values, setValues] = useState<SplitValues>({});
 	const [independentValues, setIndependentValues] = useState<SplitValues>({});
 	const [skippedTokens, setSkippedTokens] = useState<Set<string>>(new Set());
@@ -330,7 +386,6 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 				{ id: 'split-1', name: 'Split 1', color: SPLIT_COLORS[0] },
 				{ id: 'split-2', name: 'Split 2', color: SPLIT_COLORS[1] },
 			]);
-			setPrimaryId('split-1');
 			setValues({});
 			setIndependentValues({});
 			setSkippedTokens(new Set());
@@ -359,17 +414,10 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 
 	const removeSplit = useCallback((id: string) => {
 		if (splits.length <= 2) return;
-		const remaining = splits.filter((s) => s.id !== id);
-		setSplits(remaining);
-
-		if (id === primaryId) {
-			const newPrimary = remaining[0].id;
-			setPrimaryId(newPrimary);
-			setValues((v) => { const nv = { ...v }; delete nv[id]; delete nv[newPrimary]; return nv; });
-		} else {
-			setValues((v) => { const nv = { ...v }; delete nv[id]; return nv; });
-		}
-	}, [splits, primaryId]);
+		setSplits((prev) => prev.filter((s) => s.id !== id));
+		setValues((v) => { const nv = { ...v }; delete nv[id]; return nv; });
+		setIndependentValues((v) => { const nv = { ...v }; delete nv[id]; return nv; });
+	}, [splits.length]);
 
 	const setSplitName = useCallback((id: string, newName: string) => {
 		setSplits((prev) => prev.map((s) => (
@@ -395,43 +443,34 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		}));
 	}, []);
 
-	const handleAutoFix = useCallback((tokenKey: string) => {
-		const parentVal = parentMeasurement.token_values[tokenKey] ?? 0;
-		if (parentVal === 0) return;
-		const secondaries = splits.filter((s) => s.id !== primaryId);
-		const secondarySum = secondaries.reduce((sum, s) => sum + (values[s.id]?.[tokenKey] ?? 0), 0);
-		const overage = Math.round((secondarySum - parentVal) * 10) / 10;
-		if (overage <= 0) return;
-
-		let target = secondaries[0];
-		let maxVal = 0;
-		secondaries.forEach((s) => {
-			const v = values[s.id]?.[tokenKey] ?? 0;
-			if (v > maxVal) { maxVal = v; target = s; }
+	const handleResetRow = useCallback((tokenKey: string) => {
+		setValues((prev) => {
+			const next: SplitValues = {};
+			Object.entries(prev).forEach(([splitId, tokens]) => {
+				const rest = { ...tokens };
+				delete rest[tokenKey];
+				next[splitId] = rest;
+			});
+			return next;
 		});
-		if (target && maxVal >= overage) {
-			handleManualChange(target.id, tokenKey, Math.round((maxVal - overage) * 10) / 10);
-		}
-	}, [splits, primaryId, values, handleManualChange]);
+	}, []);
 
 	const hasDuplicateNames = useMemo(() => {
 		const names = splits.map((s) => s.name);
 		return new Set(names).size !== names.length;
 	}, [splits]);
 
-	const rowIssues = useMemo(() => {
-		let overCount = 0;
+	const varianceSummary = useMemo(() => {
 		const parentVals = parentMeasurement.token_values;
-		const secondaries = splits.filter((s) => s.id !== primaryId);
+		let count = 0;
 		splittableTokens.forEach((token) => {
 			if (skippedTokens.has(token.key)) return;
 			const parentVal = parentVals[token.key] ?? 0;
-			if (parentVal === 0) return;
-			const secSum = secondaries.reduce((sum, s) => sum + (values[s.id]?.[token.key] ?? 0), 0);
-			if (secSum > parentVal + 0.01) overCount++;
+			const variance = getRowVariance(splits, values, token.key, parentVal);
+			if (Math.abs(variance) >= 0.005) count++;
 		});
-		return { overCount };
-	}, [splits, primaryId, values, splittableTokens, skippedTokens]);
+		return { count };
+	}, [splits, values, splittableTokens, skippedTokens]);
 
 	const handleIndependentChange = useCallback((splitId: string, tokenKey: string, val: number) => {
 		setIndependentValues((prev) => ({
@@ -445,7 +484,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		|| Object.values(independentValues).some((sv) => Object.values(sv).some((v) => v > 0)),
 	[values, independentValues]);
 
-	const canGenerate = splits.length >= 2 && !hasDuplicateNames && rowIssues.overCount === 0;
+	const canGenerate = splits.length >= 2 && !hasDuplicateNames;
 
 	const independentTokens = useMemo(() => TOKEN_DEFINITIONS.filter(t => t.classification === 'independent'), []);
 	const fixedTokens = useMemo(() => TOKEN_DEFINITIONS.filter(t => t.classification === 'fixed'), []);
@@ -454,7 +493,6 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		if (hasDuplicateNames) { setError('Each split must have a unique name'); return; }
 		setError('');
 		const parentValues = parentMeasurement.token_values;
-		const secondaries = splits.filter((s) => s.id !== primaryId);
 		const finalScopes: SplitScope[] = splits.map((split) => {
 			const allocations: Record<string, number> = {};
 			splittableTokens.forEach((token) => {
@@ -463,14 +501,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 					allocations[token.key] = parentVal;
 					return;
 				}
-				if (split.id === primaryId) {
-					const secSum = secondaries.reduce(
-						(sum, s) => sum + (values[s.id]?.[token.key] ?? 0), 0
-					);
-					allocations[token.key] = Math.max(0, Math.round((parentVal - secSum) * 10) / 10);
-				} else {
-					allocations[token.key] = values[split.id]?.[token.key] ?? 0;
-				}
+				allocations[token.key] = getCellValue(splits, values, token.key, parentVal, split.id).value;
 			});
 			independentTokens.forEach((token) => {
 				allocations[token.key] = independentValues[split.id]?.[token.key] ?? 0;
@@ -488,7 +519,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		});
 		onGenerate(generateChildCards(parentMeasurement, finalScopes));
 		onClose();
-	}, [hasDuplicateNames, splits, primaryId, values, independentValues, skippedTokens, splittableTokens, independentTokens, fixedTokens, onGenerate, onClose]);
+	}, [hasDuplicateNames, splits, values, independentValues, skippedTokens, splittableTokens, independentTokens, fixedTokens, onGenerate, onClose]);
 
 	if (!isOpen) return null;
 
@@ -506,7 +537,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 						<div>
 							<h2 className="text-[17px] font-semibold text-[#0f172a] tracking-tight">Split Measurement</h2>
 							<p className="text-[12px] text-[#64748b] mt-0.5 leading-relaxed">
-								Enter values for each split — <span className="font-medium text-[#475569]">Split 1 auto-adjusts</span> as the remainder.
+								<span className="font-medium text-[#475569]">Split 1 pre-fills the remainder</span> — every value stays editable, and totals can differ from the report.
 							</p>
 						</div>
 						<button type="button" onClick={onClose}
@@ -595,11 +626,11 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 					{CATEGORIES.map((cat) => (
 						<CategoryGroup
 							key={cat} category={cat}
-							splits={splits} primaryId={primaryId} values={values}
+							splits={splits} values={values}
 							searchQuery={searchQuery} hideZero={hideZeroValues}
 							skippedTokens={skippedTokens}
 							onManualChange={handleManualChange}
-							onAutoFix={handleAutoFix}
+							onResetRow={handleResetRow}
 							onToggleSkip={toggleSkip}
 						/>
 					))}
@@ -627,15 +658,25 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 					)}
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">
-							{rowIssues.overCount > 0 ? (
-								<span className="text-[11px] text-[#ef4444] font-medium flex items-center gap-1">
-									{rowIssues.overCount} over-allocated — click to fix
-								</span>
-							) : !hasAnyValues ? (
+							{!hasAnyValues ? (
 								<span className="text-[11px] text-[#94a3b8]">
-									Enter values — Split 1 adjusts automatically
+									Enter site values — Split 1 pre-fills the remainder until you edit it
 								</span>
-							) : null}
+							) : varianceSummary.count > 0 ? (
+								<span className="text-[11px] text-[#b45309] font-medium flex items-center gap-1.5"
+									title="Splits don't have to add up to the report — site values are kept as entered.">
+									<span className="size-[6px] rounded-full bg-[#f59e0b] shrink-0" aria-hidden />
+									{varianceSummary.count} differ{varianceSummary.count === 1 ? 's' : ''} from report
+									<span className="text-[#94a3b8] font-normal">— saved as entered</span>
+								</span>
+							) : (
+								<span className="text-[11px] text-[#16a34a] font-medium flex items-center gap-1">
+									<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+										<path d="M20 6L9 17l-5-5" />
+									</svg>
+									All splits match the report
+								</span>
+							)}
 						</div>
 						<div className="flex items-center gap-2.5">
 							{hasAnyValues && (
