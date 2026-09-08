@@ -159,6 +159,12 @@ export default function LandingPage() {
 									This is the key interaction. The first split pre-fills <code className="bg-[#f1f5f9] px-1 rounded text-[12px]">Report − Σ(other splits)</code> as
 									she types, so the fast path needs no math. But it stays a normal, editable field — the moment she types into it, her number wins.
 								</p>
+								<p className="text-[14px] text-[#64748b] leading-[1.65] mb-3">
+									Two workflows, one screen. Dividing a report is the common case, so <strong>Pre-fill remainder</strong> is on by default. When the crew
+									measured every structure on site and the report is only a reference, she switches it off — every cell starts empty, and typing in one
+									split never moves another. It&apos;s a setup choice: the toggle <strong>locks once she starts entering values</strong>, because flipping it
+									mid-entry would quietly rewrite Split 1 on every row she hasn&apos;t typed into. A tooltip says so, and Clear all unlocks it.
+								</p>
 								<div className="bg-[#fffbeb] border border-[#fde68a] rounded-lg px-4 py-3 text-[13px] text-[#92400e] leading-[1.65]">
 									Aerial reports (GAF, EagleView) often differ from what crews find on site. So splits
 									<strong> don&apos;t have to add up to the report</strong> — any difference shows as an amber <strong>Diff chip</strong> on
@@ -185,7 +191,7 @@ export default function LandingPage() {
 								</p>
 								<p className="text-[14px] text-[#64748b] leading-[1.65] mt-2">
 									On site the crew measured 25 squares, not 21.97 — so she types <strong>19</strong> into Split 1 directly. The row shows an amber
-									<span className="text-[#d97706] font-medium"> Diff +3.03</span> chip: informational, never blocking. A hover reset (↺) restores the report&apos;s numbers if it was a typo.
+									<span className="text-[#d97706] font-medium"> Over by 3.03</span> chip: informational, never blocking. If it was a typo, <strong>Clear</strong> appears next to the measurement name on hover and puts the row back.
 								</p>
 
 								<div className="mt-4 bg-white border border-[#e2e8f0] rounded-lg overflow-hidden">
@@ -296,7 +302,11 @@ export default function LandingPage() {
 						{[
 							{
 								q: 'Angela enters 2,000 for Split 2 but total is only 3,200 with two other splits?',
-								a: 'Nothing blocks. Split 1\'s pre-fill floors at 0 and the row shows an amber Diff chip with the overage. If the site genuinely has more material than the report, she keeps her numbers — if it was a typo, the hover reset (↺) restores the report\'s values for that row.',
+								a: 'Nothing blocks. Split 1\'s pre-fill floors at 0 and the row shows an amber "Over by …" chip naming the direction and the amount. If the site genuinely has more material than the report, she keeps her numbers — if it was a typo, Clear (on hover, next to the measurement name) puts the row back.',
+							},
+							{
+								q: 'She is halfway through entering values and wants to switch pre-fill off. What happens?',
+								a: 'The toggle is locked at that point and a tooltip explains why: switching mid-entry would change what gets saved for Split 1 on every row she has not typed into — silently, across all 16 rows. Pre-fill is a setup choice, made before entry. Clearing the values (or Clear all) unlocks it. Split-specific entries like waste factor never lock it, since they are not derived from the remainder.',
 							},
 							{
 								q: 'She saves the split, then realizes Split 2 should be 900 not 800. Can she edit?',
