@@ -347,7 +347,7 @@ const STEPS = [
 		badge: 'Smart Workflow',
 		title: 'Pre-filled, Never Locked',
 		subtitle: 'Edit any value — site reality wins',
-		description: 'Split 1 pre-fills the remainder as you type, but every value stays editable. Totals can differ from the report — differences are flagged, never blocked.',
+		description: 'Split 1 pre-fills the remainder as you type, but every value stays editable — and you can switch pre-fill off to enter each split by hand. Totals can differ from the report; differences are flagged, never blocked.',
 		illustration: PrimarySplitAnimation,
 	},
 	{
