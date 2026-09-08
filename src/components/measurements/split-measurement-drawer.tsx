@@ -29,9 +29,11 @@ const fmtNum = (n: number) =>
 
 /*
  * Cell model — "pre-fill, don't lock":
- * The first split pre-fills with the remainder (report − other splits) until the
- * user edits it for that token. After that it's a manual value like any other.
- * Splits never have to add up to the report — the Δ column surfaces the difference.
+ * With pre-fill on, the first split shows the remainder (report − other splits)
+ * until the user edits it for that token. After that it's a manual value like any
+ * other. With pre-fill off, every cell starts empty and only ever shows what was
+ * typed — no column moves when you type in another.
+ * Splits never have to add up to the report — the Diff column surfaces the gap.
  */
 function getCellValue(
 	splits: SplitDef[],
@@ -39,9 +41,10 @@ function getCellValue(
 	tokenKey: string,
 	parentVal: number,
 	splitId: string,
+	prefillEnabled: boolean,
 ): { value: number; isAuto: boolean } {
 	const manual = values[splitId]?.[tokenKey];
-	if (splitId === splits[0]?.id && manual === undefined) {
+	if (prefillEnabled && splitId === splits[0]?.id && manual === undefined) {
 		const othersSum = splits
 			.slice(1)
 			.reduce((sum, s) => sum + (values[s.id]?.[tokenKey] ?? 0), 0);
@@ -55,9 +58,10 @@ function getRowVariance(
 	values: SplitValues,
 	tokenKey: string,
 	parentVal: number,
+	prefillEnabled: boolean,
 ): number {
 	const sum = splits.reduce(
-		(acc, s) => acc + getCellValue(splits, values, tokenKey, parentVal, s.id).value,
+		(acc, s) => acc + getCellValue(splits, values, tokenKey, parentVal, s.id, prefillEnabled).value,
 		0,
 	);
 	return round2(sum - parentVal);
@@ -99,33 +103,35 @@ function SplitNameInput({
 	);
 }
 
-/* ── Variance chip (Δ vs report) ── */
+/* ── Variance chip (diff vs report, in words) ── */
 function VarianceChip({ variance, rowSum, parentVal }: { variance: number; rowSum: number; parentVal: number }) {
 	if (Math.abs(variance) < 0.005) return null;
+	const direction = variance > 0 ? 'Over' : 'Under';
+	const magnitude = fmtNum(Math.abs(variance));
 	return (
 		<span
 			role="status"
-			aria-label={`Splits total ${fmtNum(rowSum)}, report says ${fmtNum(parentVal)} — ${variance > 0 ? 'over' : 'under'} by ${fmtNum(Math.abs(variance))}`}
+			aria-label={`Splits total ${fmtNum(rowSum)}, report says ${fmtNum(parentVal)} — ${direction.toLowerCase()} by ${magnitude}`}
 			title={`Splits total ${fmtNum(rowSum)} — report says ${fmtNum(parentVal)}. Site values are kept as entered.`}
-			className="inline-flex items-center rounded border border-[#fde68a] bg-[#fffbeb] px-1 py-0.5 text-[10px] font-semibold tabular-nums text-[#b45309] cursor-default select-none">
-			{variance > 0 ? `+${fmtNum(variance)}` : fmtNum(variance)}
+			className="inline-flex items-center gap-1 whitespace-nowrap rounded border border-[#fde68a] bg-[#fffbeb] px-1.5 py-0.5 text-[10px] font-semibold text-[#b45309] cursor-default select-none">
+			{direction} by
+			<span className="tabular-nums">{magnitude}</span>
 		</span>
 	);
 }
 
 /* ── Category group ── */
 function CategoryGroup({
-	category, splits, values, searchQuery, hideZero, skippedTokens, onManualChange, onResetRow, onToggleSkip,
+	category, splits, values, searchQuery, hideZero, prefillEnabled, onManualChange, onClearRow,
 }: {
 	category: TokenCategory;
 	splits: SplitDef[];
 	values: SplitValues;
 	searchQuery: string;
 	hideZero: boolean;
-	skippedTokens: Set<string>;
+	prefillEnabled: boolean;
 	onManualChange: (splitId: string, tokenKey: string, val: number) => void;
-	onResetRow: (tokenKey: string) => void;
-	onToggleSkip: (tokenKey: string) => void;
+	onClearRow: (tokenKey: string) => void;
 }) {
 	const [isOpen, setIsOpen] = useState(true);
 	const parentValues = parentMeasurement.token_values;
@@ -145,7 +151,7 @@ function CategoryGroup({
 	if (filtered.length === 0) return null;
 
 	const splitCols = splits.map(() => 'minmax(80px, 1fr)').join(' ');
-	const colTemplate = `minmax(120px, 1.4fr) 60px ${splitCols} 64px`;
+	const colTemplate = `minmax(120px, 1.4fr) 60px ${splitCols} 100px`;
 
 	return (
 		<div className="border-b border-[#e5e7eb] last:border-b-0">
@@ -169,7 +175,7 @@ function CategoryGroup({
 						<span className="text-[10px] font-semibold text-[#94a3b8] uppercase tracking-widest text-right">Report</span>
 						{splits.map((s, idx) => (
 							<span key={s.id} className="flex items-center justify-end gap-1.5 pr-0.5"
-								title={idx === 0 ? 'Pre-fills the remainder until you edit it' : undefined}>
+								title={idx === 0 && prefillEnabled ? 'Pre-fills the remainder until you edit it' : undefined}>
 								<span className="size-[6px] rounded-full shrink-0" style={{ backgroundColor: s.color }} />
 								<span className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider truncate">{s.name}</span>
 							</span>
@@ -183,81 +189,58 @@ function CategoryGroup({
 
 					{filtered.map((token) => {
 						const parentVal = parentValues[token.key] ?? 0;
-						const isSkipped = skippedTokens.has(token.key);
-						const variance = isSkipped ? 0 : getRowVariance(splits, values, token.key, parentVal);
+						const variance = getRowVariance(splits, values, token.key, parentVal, prefillEnabled);
 						const rowSum = round2(parentVal + variance);
 						const isRowDirty = splits.some((s) => values[s.id]?.[token.key] !== undefined);
 
 						return (
 							<div key={token.key}
-								className={`group/row grid items-center gap-x-3 px-5 py-[6px] border-b border-[#f1f5f9] last:border-b-0 transition-colors duration-100 ${isSkipped ? 'bg-[#fafbfc]' : 'hover:bg-[#fafbfc]'}`}
+								className="group/row grid items-center gap-x-3 px-5 py-[6px] border-b border-[#f1f5f9] last:border-b-0 transition-colors duration-100 hover:bg-[#fafbfc]"
 								style={{ gridTemplateColumns: colTemplate }}>
 								<span className="flex items-center gap-1.5 min-w-0">
-									<span className={`text-[12px] leading-snug truncate ${isSkipped ? 'text-[#94a3b8]' : 'text-[#334155]'}`} title={token.label}>
+									<span className="text-[12px] leading-snug truncate text-[#334155]" title={token.label}>
 										{token.label}
 									</span>
-									{isSkipped ? (
-										<button type="button" onClick={() => onToggleSkip(token.key)}
-											className="shrink-0 flex items-center justify-center size-[18px] rounded text-[#94a3b8] opacity-0 group-hover/row:opacity-100 transition-opacity duration-150 cursor-pointer hover:text-[#3b82f6] hover:bg-[#eff6ff]"
-											title="Undo skip">
-											<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-												<polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-											</svg>
-										</button>
-									) : (
-										<button type="button" onClick={() => onToggleSkip(token.key)}
-											className="shrink-0 text-[10px] font-medium text-[#94a3b8] opacity-0 group-hover/row:opacity-100 transition-opacity duration-150 cursor-pointer hover:text-[#64748b] hover:underline">
-											Skip
+									{/* Only offer Clear on rows that actually hold an entered value */}
+									{isRowDirty && (
+										<button type="button" onClick={() => onClearRow(token.key)}
+											className="shrink-0 text-[10px] font-medium text-[#94a3b8] opacity-0 group-hover/row:opacity-100 transition-opacity duration-150 cursor-pointer hover:text-[#64748b] hover:underline"
+											title="Clear the values entered on this row">
+											Clear
 										</button>
 									)}
 								</span>
-								<span className={`text-[12px] text-right tabular-nums font-medium ${isSkipped ? 'text-[#cbd5e1]' : 'text-[#94a3b8]'}`}>
+								<span className="text-[12px] text-right tabular-nums font-medium text-[#94a3b8]">
 									{parentVal.toLocaleString()}
 								</span>
 
-								{isSkipped ? (
-									splits.map((s) => (
-										<span key={s.id}
-											className="h-[30px] w-full rounded-md px-2 flex items-center justify-end text-[12px] font-medium select-none text-[#cbd5e1]">
-											—
-										</span>
-									))
-								) : (
-									splits.map((s) => {
-										const cell = getCellValue(splits, values, token.key, parentVal, s.id);
-										return (
-											<input
-												key={s.id}
-												type="number" step="any" min={0}
-												value={cell.isAuto ? cell.value : (cell.value || '')}
-												onChange={(e) => {
-													const raw = e.target.value;
-													onManualChange(s.id, token.key, raw === '' ? 0 : (parseFloat(raw) || 0));
-												}}
-												placeholder="0"
-												aria-label={`${s.name} — ${token.label}${cell.isAuto ? ' (pre-filled with the remainder)' : ''}`}
-												title={cell.isAuto ? 'Pre-filled with the remainder — type to override' : undefined}
-												className={`h-[30px] w-full rounded-md border px-2 text-[12px] text-right tabular-nums outline-none transition-all duration-150 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/15 ${
-													cell.isAuto
-														? 'border-transparent bg-[#f8fafc] font-medium text-[#64748b] hover:border-[#cbd5e1] focus:bg-white focus:text-[#334155]'
-														: 'border-[#e2e8f0] bg-white text-[#334155] hover:border-[#cbd5e1]'
-												}`}
-											/>
-										);
-									})
-								)}
+								{splits.map((s) => {
+									const cell = getCellValue(splits, values, token.key, parentVal, s.id, prefillEnabled);
+									return (
+										<input
+											key={s.id}
+											type="number" step="any" min={0}
+											value={cell.isAuto ? cell.value : (cell.value || '')}
+											onChange={(e) => {
+												const raw = e.target.value;
+												onManualChange(s.id, token.key, raw === '' ? 0 : (parseFloat(raw) || 0));
+											}}
+											placeholder="0"
+											aria-label={`${s.name} — ${token.label}${cell.isAuto ? ' (pre-filled with the remainder)' : ''}`}
+											title={cell.isAuto ? 'Pre-filled with the remainder — type to override' : undefined}
+											className={`h-[30px] w-full rounded-md border px-2 text-[12px] text-right tabular-nums outline-none transition-all duration-150 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/15 ${
+												cell.isAuto
+													? 'border-transparent bg-[#f8fafc] font-medium text-[#64748b] hover:border-[#cbd5e1] focus:bg-white focus:text-[#334155]'
+													: 'border-[#e2e8f0] bg-white text-[#334155] hover:border-[#cbd5e1]'
+											}`}
+										/>
+									);
+								})}
 
-								<span className="flex items-center justify-end gap-1">
-									{!isSkipped && isRowDirty && (
-										<button type="button" onClick={() => onResetRow(token.key)}
-											className="flex items-center justify-center size-[18px] rounded text-[#94a3b8] opacity-0 group-hover/row:opacity-100 transition-opacity duration-150 cursor-pointer hover:text-[#3b82f6] hover:bg-[#eff6ff]"
-											title="Reset row to report values">
-											<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-												<polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-											</svg>
-										</button>
-									)}
-									{!isSkipped && <VarianceChip variance={variance} rowSum={rowSum} parentVal={parentVal} />}
+								{/* Untouched rows have nothing to reconcile — with pre-fill off they'd all
+								    read "Under by <full report>", which is noise, not a signal. */}
+								<span className="flex items-center justify-end">
+									{isRowDirty && <VarianceChip variance={variance} rowSum={rowSum} parentVal={parentVal} />}
 								</span>
 
 							</div>
@@ -297,7 +280,7 @@ function SplitSpecificSection({
 	if (filtered.length === 0) return null;
 
 	const splitCols = splits.map(() => 'minmax(80px, 1fr)').join(' ');
-	const colTemplate = `minmax(120px, 1.4fr) 60px ${splitCols} 64px`;
+	const colTemplate = `minmax(120px, 1.4fr) 60px ${splitCols} 100px`;
 
 	return (
 		<div className="border-b border-[#e5e7eb] last:border-b-0">
@@ -365,6 +348,75 @@ function SplitSpecificSection({
 	);
 }
 
+/* ── Pre-fill remainder toggle ──
+ * Locks once splittable values are entered. Flipping mid-entry would silently
+ * rewrite what gets saved for the first split on every row not yet typed into —
+ * so this is a setup decision, made before entry starts. Reset unlocks it.
+ * Uses aria-disabled (not disabled) so the control stays focusable and can
+ * still announce why it's locked.
+ */
+function PrefillToggle({
+	enabled, isLocked, splitOneName, onToggle,
+}: {
+	enabled: boolean;
+	isLocked: boolean;
+	splitOneName: string;
+	onToggle: () => void;
+}) {
+	const [showTip, setShowTip] = useState(false);
+
+	/* Tooltips describe the action, not the current state — the switch already
+	   shows the state. Kept to one or two lines; a tooltip that needs a paragraph
+	   is a sign the control is wrong. */
+	const lockedReason = `Locked — switching now would rewrite ${splitOneName}. Clear all to unlock.`;
+	const tip = isLocked
+		? lockedReason
+		: enabled
+			? 'Turn off to enter every value by hand.'
+			: `Turn on to pre-fill ${splitOneName} with the remainder.`;
+
+	return (
+		<span
+			className="relative mt-[3px] shrink-0"
+			onMouseEnter={() => setShowTip(true)}
+			onMouseLeave={() => setShowTip(false)}>
+			<button
+				type="button" role="switch" aria-checked={enabled}
+				aria-disabled={isLocked}
+				aria-label={isLocked ? `Pre-fill remainder — ${lockedReason}` : 'Pre-fill remainder'}
+				onClick={() => { if (!isLocked) onToggle(); }}
+				onFocus={() => setShowTip(true)}
+				onBlur={() => setShowTip(false)}
+				className={`flex h-[32px] items-center gap-2 rounded-md px-2 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/30 ${
+					isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-white'
+				}`}>
+				<span
+					className={`relative flex h-[15px] w-[26px] shrink-0 items-center rounded-full transition-colors duration-200 ease-out ${enabled ? 'bg-[#3b82f6]' : 'bg-[#cbd5e1]'}`}
+					aria-hidden>
+					<span className={`absolute size-[11px] rounded-full bg-white shadow-sm transition-transform duration-200 ease-out ${enabled ? 'translate-x-[13px]' : 'translate-x-[2px]'}`} />
+				</span>
+				{isLocked && (
+					<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5"
+						strokeLinecap="round" strokeLinejoin="round" className="shrink-0" aria-hidden>
+						<rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+					</svg>
+				)}
+				<span className={`text-[11px] font-medium whitespace-nowrap transition-colors duration-150 ${enabled ? 'text-[#334155]' : 'text-[#94a3b8]'}`}>
+					Pre-fill remainder
+				</span>
+			</button>
+
+			{showTip && (
+				<span role="tooltip"
+					className="pointer-events-none absolute right-0 top-full z-50 mt-2 w-max max-w-[268px] rounded-lg bg-[#0f172a] px-2.5 py-1.5 text-[11px] leading-[1.5] text-white shadow-lg">
+					{tip}
+					<span className="absolute bottom-full right-4 -mb-[1px] border-4 border-transparent border-b-[#0f172a]" />
+				</span>
+			)}
+		</span>
+	);
+}
+
 const SPLIT_COLORS = ['#4F46E5', '#E18026', '#0891B2', '#28A138'];
 
 /* ── Main drawer ── */
@@ -375,9 +427,9 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 	]);
 	const [values, setValues] = useState<SplitValues>({});
 	const [independentValues, setIndependentValues] = useState<SplitValues>({});
-	const [skippedTokens, setSkippedTokens] = useState<Set<string>>(new Set());
 	const [searchQuery, setSearchQuery] = useState('');
 	const [hideZeroValues, setHideZeroValues] = useState(true);
+	const [prefillEnabled, setPrefillEnabled] = useState(true);
 	const [error, setError] = useState('');
 
 	useEffect(() => {
@@ -388,9 +440,9 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 			]);
 			setValues({});
 			setIndependentValues({});
-			setSkippedTokens(new Set());
 			setSearchQuery('');
 			setHideZeroValues(true);
+			setPrefillEnabled(true);
 			setError('');
 		}
 	}, [isOpen]);
@@ -425,15 +477,6 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		)));
 	}, []);
 
-	const toggleSkip = useCallback((tokenKey: string) => {
-		setSkippedTokens((prev) => {
-			const next = new Set(prev);
-			if (next.has(tokenKey)) next.delete(tokenKey);
-			else next.add(tokenKey);
-			return next;
-		});
-	}, []);
-
 	const splittableTokens = useMemo(() => TOKEN_DEFINITIONS.filter(t => t.classification === 'splittable'), []);
 
 	const handleManualChange = useCallback((splitId: string, tokenKey: string, val: number) => {
@@ -443,7 +486,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		}));
 	}, []);
 
-	const handleResetRow = useCallback((tokenKey: string) => {
+	const handleClearRow = useCallback((tokenKey: string) => {
 		setValues((prev) => {
 			const next: SplitValues = {};
 			Object.entries(prev).forEach(([splitId, tokens]) => {
@@ -464,13 +507,15 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		const parentVals = parentMeasurement.token_values;
 		let count = 0;
 		splittableTokens.forEach((token) => {
-			if (skippedTokens.has(token.key)) return;
+			// Mirror the row chip: only rows with an entered value can differ.
+			const isRowDirty = splits.some((s) => values[s.id]?.[token.key] !== undefined);
+			if (!isRowDirty) return;
 			const parentVal = parentVals[token.key] ?? 0;
-			const variance = getRowVariance(splits, values, token.key, parentVal);
+			const variance = getRowVariance(splits, values, token.key, parentVal, prefillEnabled);
 			if (Math.abs(variance) >= 0.005) count++;
 		});
 		return { count };
-	}, [splits, values, splittableTokens, skippedTokens]);
+	}, [splits, values, splittableTokens, prefillEnabled]);
 
 	const handleIndependentChange = useCallback((splitId: string, tokenKey: string, val: number) => {
 		setIndependentValues((prev) => ({
@@ -479,10 +524,17 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		}));
 	}, []);
 
+	/* Only splittable entries lock the pre-fill mode — a split-specific value like
+	   waste factor is never derived from the remainder, so it has no bearing on it.
+	   Clearing a value back to empty unlocks the toggle again. */
+	const hasSplitValues = useMemo(() =>
+		Object.values(values).some((sv) => Object.values(sv).some((v) => v > 0)),
+	[values]);
+
 	const hasAnyValues = useMemo(() =>
-		Object.values(values).some((sv) => Object.values(sv).some((v) => v > 0))
+		hasSplitValues
 		|| Object.values(independentValues).some((sv) => Object.values(sv).some((v) => v > 0)),
-	[values, independentValues]);
+	[hasSplitValues, independentValues]);
 
 	const canGenerate = splits.length >= 2 && !hasDuplicateNames;
 
@@ -497,11 +549,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 			const allocations: Record<string, number> = {};
 			splittableTokens.forEach((token) => {
 				const parentVal = parentValues[token.key] ?? 0;
-				if (skippedTokens.has(token.key)) {
-					allocations[token.key] = parentVal;
-					return;
-				}
-				allocations[token.key] = getCellValue(splits, values, token.key, parentVal, split.id).value;
+				allocations[token.key] = getCellValue(splits, values, token.key, parentVal, split.id, prefillEnabled).value;
 			});
 			independentTokens.forEach((token) => {
 				allocations[token.key] = independentValues[split.id]?.[token.key] ?? 0;
@@ -519,7 +567,7 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 		});
 		onGenerate(generateChildCards(parentMeasurement, finalScopes));
 		onClose();
-	}, [hasDuplicateNames, splits, values, independentValues, skippedTokens, splittableTokens, independentTokens, fixedTokens, onGenerate, onClose]);
+	}, [hasDuplicateNames, splits, values, independentValues, prefillEnabled, splittableTokens, independentTokens, fixedTokens, onGenerate, onClose]);
 
 	if (!isOpen) return null;
 
@@ -537,7 +585,15 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 						<div>
 							<h2 className="text-[17px] font-semibold text-[#0f172a] tracking-tight">Split Measurement</h2>
 							<p className="text-[12px] text-[#64748b] mt-0.5 leading-relaxed">
-								<span className="font-medium text-[#475569]">Split 1 pre-fills the remainder</span> — every value stays editable, and totals can differ from the report.
+								{prefillEnabled ? (
+									<>
+										<span className="font-medium text-[#475569]">{splits[0]?.name ?? 'Split 1'} pre-fills the remainder</span> — every value stays editable, and totals can differ from the report.
+									</>
+								) : (
+									<>
+										<span className="font-medium text-[#475569]">Every value is entered by hand</span> — nothing is pre-filled, and totals can differ from the report.
+									</>
+								)}
 							</p>
 						</div>
 						<button type="button" onClick={onClose}
@@ -550,36 +606,48 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 					</div>
 				</div>
 
-				{/* Split chips */}
+				{/* Split chips — chips wrap in their own column so the toggle keeps a fixed slot */}
 				<div className="shrink-0 border-b border-[#e5e7eb] px-6 py-3.5 bg-[#fafbfc]">
-					<div className="flex items-center gap-2.5 flex-wrap">
-						{splits.map((s) => (
-							<div key={s.id}
-								className="flex items-center gap-0.5 rounded-lg border border-[#e2e8f0] bg-white pl-2.5 pr-1 py-1 transition-all duration-150 hover:border-[#cbd5e1] hover:shadow-sm focus-within:border-[#3b82f6] focus-within:ring-2 focus-within:ring-[#3b82f6]/15">
-								<SplitNameInput
-									value={s.name} color={s.color}
-									onChange={(n) => setSplitName(s.id, n)}
-								/>
-								{splits.length > 2 && (
-									<button type="button" onClick={() => removeSplit(s.id)}
-										className="flex items-center justify-center size-[28px] rounded-md text-[#d4d4d8] transition-all duration-150 hover:bg-[#fef2f2] hover:text-[#ef4444]"
-										aria-label={`Remove ${s.name}`}>
-										<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-											<path d="M18 6L6 18" /><path d="M6 6l12 12" />
-										</svg>
-									</button>
-								)}
-							</div>
-						))}
-						{splits.length < 4 && (
-							<button type="button" onClick={addSplit}
-								className="flex items-center gap-1.5 rounded-lg border border-dashed border-[#cbd5e1] px-3 py-[7px] text-[12px] font-medium text-[#94a3b8] transition-all duration-150 hover:border-[#3b82f6] hover:text-[#3b82f6] hover:bg-[#eff6ff]">
-								<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-									<path d="M12 5v14" /><path d="M5 12h14" />
-								</svg>
-								Add split
-							</button>
-						)}
+					<div className="flex items-start justify-between gap-4">
+						<div className="flex min-w-0 flex-wrap items-center gap-2.5">
+							{splits.map((s) => (
+								<div key={s.id}
+									className="flex items-center gap-0.5 rounded-lg border border-[#e2e8f0] bg-white pl-2.5 pr-1 py-1 transition-all duration-150 hover:border-[#cbd5e1] hover:shadow-sm focus-within:border-[#3b82f6] focus-within:ring-2 focus-within:ring-[#3b82f6]/15">
+									<SplitNameInput
+										value={s.name} color={s.color}
+										onChange={(n) => setSplitName(s.id, n)}
+									/>
+									{splits.length > 2 && (
+										<button type="button" onClick={() => removeSplit(s.id)}
+											className="flex items-center justify-center size-[28px] rounded-md text-[#d4d4d8] transition-all duration-150 hover:bg-[#fef2f2] hover:text-[#ef4444]"
+											aria-label={`Remove ${s.name}`}>
+											<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+												<path d="M18 6L6 18" /><path d="M6 6l12 12" />
+											</svg>
+										</button>
+									)}
+								</div>
+							))}
+							{splits.length < 4 && (
+								<button type="button" onClick={addSplit}
+									className="flex items-center gap-1.5 rounded-lg border border-dashed border-[#cbd5e1] px-3 py-[7px] text-[12px] font-medium text-[#94a3b8] transition-all duration-150 hover:border-[#3b82f6] hover:text-[#3b82f6] hover:bg-[#eff6ff]">
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+										<path d="M12 5v14" /><path d="M5 12h14" />
+									</svg>
+									Add split
+								</button>
+							)}
+						</div>
+
+						{/* Pre-fill behaviour lives with split setup, not with the row filters below.
+						    Pinned top-right on its own so adding splits never moves it, and so it
+						    never lines up beside a chip and reads as a per-split setting. */}
+						<PrefillToggle
+							enabled={prefillEnabled}
+							isLocked={hasSplitValues}
+							splitOneName={splits[0]?.name ?? 'Split 1'}
+							onToggle={() => setPrefillEnabled((p) => !p)}
+						/>
 					</div>
 					{hasDuplicateNames && (
 						<p className="text-[11px] text-[#ef4444] mt-2 flex items-center gap-1">
@@ -628,10 +696,9 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 							key={cat} category={cat}
 							splits={splits} values={values}
 							searchQuery={searchQuery} hideZero={hideZeroValues}
-							skippedTokens={skippedTokens}
+							prefillEnabled={prefillEnabled}
 							onManualChange={handleManualChange}
-							onResetRow={handleResetRow}
-							onToggleSkip={toggleSkip}
+							onClearRow={handleClearRow}
 						/>
 					))}
 
@@ -660,7 +727,9 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 						<div className="flex items-center gap-3">
 							{!hasAnyValues ? (
 								<span className="text-[11px] text-[#94a3b8]">
-									Enter site values — Split 1 pre-fills the remainder until you edit it
+									{prefillEnabled
+										? `Enter site values — ${splits[0]?.name ?? 'Split 1'} pre-fills the remainder until you edit it`
+										: 'Enter site values for each split — nothing is pre-filled'}
 								</span>
 							) : varianceSummary.count > 0 ? (
 								<span className="text-[11px] text-[#b45309] font-medium flex items-center gap-1.5"
@@ -674,16 +743,16 @@ export function SplitMeasurementDrawer({ isOpen, onClose, onGenerate }: SplitMea
 									<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
 										<path d="M20 6L9 17l-5-5" />
 									</svg>
-									All splits match the report
+									{prefillEnabled ? 'All splits match the report' : 'Every value entered matches the report'}
 								</span>
 							)}
 						</div>
 						<div className="flex items-center gap-2.5">
 							{hasAnyValues && (
-								<button type="button" onClick={() => { setValues({}); setIndependentValues({}); setSkippedTokens(new Set()); }}
+								<button type="button" onClick={() => { setValues({}); setIndependentValues({}); }}
 									className="h-[36px] rounded-md px-3.5 text-[12px] font-medium text-[#94a3b8] transition-all duration-150 hover:text-[#ef4444] hover:bg-[#fef2f2] active:scale-[0.98]"
-									title="Reset all values">
-									Reset
+									title="Clear every value entered across all splits">
+									Clear all
 								</button>
 							)}
 							<button type="button" onClick={onClose}
